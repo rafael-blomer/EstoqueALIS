@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+import java.util.function.BinaryOperator;
+
 @Entity
 public class Produto {
 
@@ -15,14 +17,17 @@ public class Produto {
     private String nome;
     private String descricao;
     private String categoria;
+    private Boolean ativo;
 
     public Produto(String categoria, String descricao, String nome) {
         this.categoria = categoria;
         this.descricao = descricao;
         this.nome = nome;
+        this.ativo = true;
     }
 
     public Produto() {
+        this.ativo = true;
     }
 
     public String getCategoria() {
@@ -55,5 +60,13 @@ public class Produto {
 
     public void setNome(String nome) {
         this.nome = nome;
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
     }
 }
