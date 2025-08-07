@@ -69,4 +69,8 @@ public class LoteProduto {
     public void setQuantidade(Integer quantidade) {
         this.quantidade = quantidade;
     }
+
+    public Boolean estaVencido() {
+        return LocalDate.now().isAfter(this.dataValidade);
+    }
 }

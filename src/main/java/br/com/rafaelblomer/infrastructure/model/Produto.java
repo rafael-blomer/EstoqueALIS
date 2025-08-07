@@ -1,11 +1,10 @@
 package br.com.rafaelblomer.infrastructure.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 
-import java.util.function.BinaryOperator;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Produto {
@@ -13,6 +12,10 @@ public class Produto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private final List<LoteProduto> loteProdutos = new ArrayList<>();
 
     private String nome;
     private String descricao;
@@ -68,5 +71,13 @@ public class Produto {
 
     public void setAtivo(Boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public List<LoteProduto> getLoteProdutos() {
+        return loteProdutos;
+    }
+
+    public void adicionarLoteProduto(LoteProduto loteProdutos) {
+        this.loteProdutos.add(loteProdutos);
     }
 }
