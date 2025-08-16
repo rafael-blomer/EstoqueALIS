@@ -2,6 +2,9 @@ package br.com.rafaelblomer.infrastructure.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
 
 @Entity
 public class Estoque {
@@ -10,14 +13,20 @@ public class Estoque {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Boolean ativo;
-
     @ManyToOne
-    @NotBlank
-    private Usuario dono;
+    @JoinColumn(name = "usuario_id")
+    @NotNull
+    private Usuario usuario;
+    @OneToMany(mappedBy = "estoque", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LoteProduto> lotes;
+    @OneToMany(mappedBy = "estoque", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MovimentacaoEstoque> movimentacoes;
 
-    public Estoque(Usuario dono) {
-        this.dono = dono;
+    public Estoque(Usuario usuario, List<LoteProduto> lotes, List<MovimentacaoEstoque> movimentacoes) {
         this.ativo = true;
+        this.usuario = usuario;
+        this.lotes = lotes;
+        this.movimentacoes = movimentacoes;
     }
 
     public Estoque() {
@@ -39,11 +48,27 @@ public class Estoque {
         this.ativo = ativo;
     }
 
-    public @NotBlank Usuario getDono() {
-        return dono;
+    public @NotNull Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setDono(@NotBlank Usuario dono) {
-        this.dono = dono;
+    public void setUsuario(@NotNull Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public List<LoteProduto> getLotes() {
+        return lotes;
+    }
+
+    public void setLotes(List<LoteProduto> lotes) {
+        this.lotes = lotes;
+    }
+
+    public List<MovimentacaoEstoque> getMovimentacoes() {
+        return movimentacoes;
+    }
+
+    public void setMovimentacoes(List<MovimentacaoEstoque> movimentacoes) {
+        this.movimentacoes = movimentacoes;
     }
 }

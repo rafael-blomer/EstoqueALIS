@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 
 import java.util.List;
 
-@Entity(name = "tb_usuario")
+@Entity
 public class Usuario {
 
     @Id
@@ -26,8 +26,7 @@ public class Usuario {
     @Size(min = 14, max = 14)
     private String cnpj;
     private Boolean ativo;
-
-    @OneToMany
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Estoque> estoques;
 
     public Usuario(String nome, String email, String cnpj, String telefone, String senha, List<Estoque> estoques) {
@@ -41,6 +40,38 @@ public class Usuario {
     }
 
     public Usuario() {
+    }
+
+    public Boolean getAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(Boolean ativo) {
+        this.ativo = ativo;
+    }
+
+    public @NotBlank @Size(min = 14, max = 14) String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(@NotBlank @Size(min = 14, max = 14) String cnpj) {
+        this.cnpj = cnpj;
+    }
+
+    public @NotBlank @Email String getEmail() {
+        return email;
+    }
+
+    public void setEmail(@NotBlank @Email String email) {
+        this.email = email;
+    }
+
+    public List<Estoque> getEstoques() {
+        return estoques;
+    }
+
+    public void setEstoques(List<Estoque> estoques) {
+        this.estoques = estoques;
     }
 
     public Long getId() {
@@ -59,22 +90,6 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public @NotBlank @Email String getEmail() {
-        return email;
-    }
-
-    public void setEmail(@NotBlank @Email String email) {
-        this.email = email;
-    }
-
-    public @NotBlank @Size(min = 11, max = 13) String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(@NotBlank @Size(min = 11, max = 13) String telefone) {
-        this.telefone = telefone;
-    }
-
     public @NotBlank String getSenha() {
         return senha;
     }
@@ -83,23 +98,11 @@ public class Usuario {
         this.senha = senha;
     }
 
-    public @NotBlank @Size(min = 14, max = 14) String getCnpj() {
-        return cnpj;
+    public @NotBlank @Size(min = 11, max = 13) String getTelefone() {
+        return telefone;
     }
 
-    public void setCnpj(@NotBlank @Size(min = 14, max = 14) String cnpj) {
-        this.cnpj = cnpj;
-    }
-
-    public Boolean getAtivo() {
-        return ativo;
-    }
-
-    public void setAtivo(Boolean ativo) {
-        this.ativo = ativo;
-    }
-
-    public List<Estoque> getEstoques() {
-        return estoques;
+    public void setTelefone(@NotBlank @Size(min = 11, max = 13) String telefone) {
+        this.telefone = telefone;
     }
 }

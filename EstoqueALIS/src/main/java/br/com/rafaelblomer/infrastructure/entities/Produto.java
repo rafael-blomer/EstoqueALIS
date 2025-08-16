@@ -19,15 +19,15 @@ public class Produto {
     @NotNull
     private String descricao;
     private Boolean ativo;
-    @NotNull
+    @Transient
     private Integer quantidadeTotal;
-    @OneToMany
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoteProduto> lotes;
 
-    public Produto(String nome, String descricao, Boolean ativo, Integer quantidadeTotal, List<LoteProduto> lotes) {
+    public Produto(String nome, String descricao, Integer quantidadeTotal, List<LoteProduto> lotes) {
         this.nome = nome;
         this.descricao = descricao;
-        this.ativo = ativo;
+        this.ativo = true;
         this.quantidadeTotal = quantidadeTotal;
         this.lotes = lotes;
     }
@@ -67,11 +67,11 @@ public class Produto {
         this.ativo = ativo;
     }
 
-    public @NotNull Integer getQuantidadeTotal() {
+    public Integer getQuantidadeTotal() {
         return quantidadeTotal;
     }
 
-    public void setQuantidadeTotal(@NotNull Integer quantidadeTotal) {
+    public void setQuantidadeTotal(Integer quantidadeTotal) {
         this.quantidadeTotal = quantidadeTotal;
     }
 
