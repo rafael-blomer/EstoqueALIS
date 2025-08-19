@@ -19,11 +19,13 @@ public class Usuario {
     private String email;
     @NotBlank
     @Size(min = 11, max = 13)
+    @Column(unique = true)
     private String telefone;
     @NotBlank
     private String senha;
     @NotBlank
     @Size(min = 14, max = 14)
+    @Column(unique = true)
     private String cnpj;
     private Boolean ativo;
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
