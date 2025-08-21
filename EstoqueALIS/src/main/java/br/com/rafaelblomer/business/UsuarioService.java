@@ -67,7 +67,7 @@ public class UsuarioService {
             antigo.setSenha(novo.senha());
     }
 
-    private Usuario buscarUsuarioEntity(Long id) {
+    public Usuario buscarUsuarioEntity(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("O usuário não foi encontrado"));
     }
 
