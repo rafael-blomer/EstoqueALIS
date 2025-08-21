@@ -22,7 +22,7 @@ public class MovimentacaoEstoque {
     @NotNull
     @Enumerated(EnumType.STRING)
     private TipoMovimentacao tipoMov;
-    @OneToMany(mappedBy = "movimentacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "movimentacaoEstoque", cascade = CascadeType.ALL, orphanRemoval = true)
     @NotNull
     private List<ItemMovimentacaoLote> itensMovimentacao;
 

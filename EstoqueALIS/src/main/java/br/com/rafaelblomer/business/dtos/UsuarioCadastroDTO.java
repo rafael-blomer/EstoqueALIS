@@ -8,5 +8,5 @@ public record UsuarioCadastroDTO(@NotBlank String nome,
                                  @NotBlank @Email String email,
                                  @NotBlank @Size(min = 14, max = 14) String cnpj,
                                  @NotBlank @Size(min = 11, max = 13) String telefone,
-                                 @NotBlank String senha) {
+                                 @NotBlank @Size(min = 10) String senha) {
 }

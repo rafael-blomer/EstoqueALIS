@@ -3,9 +3,11 @@ package br.com.rafaelblomer.business.converters;
 import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 
+@Component
 public class UsuarioConverter {
     public Usuario dtoCadastroParaEntity(UsuarioCadastroDTO entityCadastro) {
         return new Usuario(

@@ -9,7 +9,14 @@ import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.business.exceptions.UsuarioInativoException;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
+import br.com.rafaelblomer.infrastructure.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,13 +30,26 @@ public class UsuarioService {
     @Autowired
     private UsuarioConverter converter;
 
+    @Autowired
+    private PasswordEncoder encoder;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+
     public UsuarioResponseDTO criarUsuario(UsuarioCadastroDTO entityCadastro) {
         Usuario entity = converter.dtoCadastroParaEntity(entityCadastro);
+        entity.setSenha(encoder.encode(entity.getSenha()));
         return converter.entityParaResponseDTO(repository.save(entity));
     }
 
-    public UsuarioResponseDTO buscarPorId(Long id) {
-        return converter.entityParaResponseDTO(buscarUsuarioEntity(id));
+    //fazer exceção personalizada caso de erro ao buscar token
+    public UsuarioResponseDTO buscarUsuarioToken(String token) {
+        String email = jwtUtil.extrairEmailToken(token.substring(7));
+        return converter.entityParaResponseDTO(findByEmail(email));
     }
 
     public List<UsuarioResponseDTO> buscarTodosUsuarios() {
@@ -53,9 +73,14 @@ public class UsuarioService {
         repository.save(entity);
     }
 
-    //TODO: implementar Security e verificar se usuario está ativo
-    public void realizarLogin(UsuarioLoginDTO dto) {
-
+    public String realizarLogin(UsuarioLoginDTO dto) {
+        Usuario usuario = findByEmail(dto.email());
+        if (!usuario.getAtivo())
+            throw new UsuarioInativoException("Usuario foi desativado");
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwtToken = jwtUtil.generateToken(authentication.getName());
+        return "Bearer " + jwtToken;
     }
 
     private void atualizarDadosUsuario(Usuario antigo, UsuarioAtualizacaoDTO novo) {
@@ -75,4 +100,10 @@ public class UsuarioService {
         if(entity.getAtivo())
             throw new UsuarioInativoException("O usuário não está ativo.");
     }
+
+    private Usuario findByEmail(String email) {
+        return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+    }
+
+
 }
