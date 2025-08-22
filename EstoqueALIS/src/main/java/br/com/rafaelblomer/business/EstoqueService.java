@@ -21,8 +21,8 @@ public class EstoqueService {
     @Autowired
     private UsuarioService usuarioService;
 
-    public EstoqueResponseDTO criarNovoEstoque(Long idUsuario) {
-        Estoque estoque = new Estoque(usuarioService.buscarUsuarioEntity(idUsuario));
+    public EstoqueResponseDTO criarNovoEstoque(String token) {
+        Estoque estoque = new Estoque(usuarioService.findByToken(token));
         repository.save(estoque);
         return converter.entityParaResponseDTO(estoque);
     }

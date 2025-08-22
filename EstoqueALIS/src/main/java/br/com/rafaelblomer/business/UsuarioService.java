@@ -19,8 +19,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class UsuarioService {
 
@@ -47,34 +45,28 @@ public class UsuarioService {
     }
 
     //fazer exceção personalizada caso de erro ao buscar token
-    public UsuarioResponseDTO buscarUsuarioToken(String token) {
-        String email = jwtUtil.extrairEmailToken(token.substring(7));
-        return converter.entityParaResponseDTO(findByEmail(email));
+    public UsuarioResponseDTO buscarUsuarioDTOToken(String token) {
+        Usuario usuario = findByToken(token);
+        return converter.entityParaResponseDTO(usuario);
     }
 
-    public List<UsuarioResponseDTO> buscarTodosUsuarios() {
-        return repository.findAll()
-                .stream()
-                .filter(e -> e.getAtivo().equals(true))
-                .map(u -> converter.entityParaResponseDTO(u))
-                .toList();
-    }
-
-    public UsuarioResponseDTO atualizarUsuario(Long id, UsuarioAtualizacaoDTO novo) {
-        Usuario antigo = buscarUsuarioEntity(id);
+    public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
+        Usuario antigo = findByToken(token);
         verificarUsuarioAtivo(antigo);
         atualizarDadosUsuario(antigo, novo);
-        return converter.entityParaResponseDTO(repository.save(antigo));
+        repository.save(antigo);
+        return converter.entityParaResponseDTO(antigo);
     }
 
-    public void alterarStatusAtivoUsuario(Long id) {
-        Usuario entity = buscarUsuarioEntity(id);
-        entity.setAtivo(!entity.getAtivo());
+    public void alterarStatusAtivoUsuario(String token) {
+        Usuario entity = findByToken(token);
+        entity.setAtivo(false);
         repository.save(entity);
     }
 
+    //Criar exceção para login errado
     public String realizarLogin(UsuarioLoginDTO dto) {
-        Usuario usuario = findByEmail(dto.email());
+        Usuario usuario = repository.findByEmail(dto.email()).orElseThrow(() -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
         if (!usuario.getAtivo())
             throw new UsuarioInativoException("Usuario foi desativado");
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
@@ -83,27 +75,24 @@ public class UsuarioService {
         return "Bearer " + jwtToken;
     }
 
+    public Usuario findByToken(String token) {
+        String email = jwtUtil.extrairEmailToken(token.substring(7));
+        return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+    }
+
     private void atualizarDadosUsuario(Usuario antigo, UsuarioAtualizacaoDTO novo) {
         if(novo.nome() != null)
             antigo.setNome(novo.nome());
         if (novo.telefone() != null)
             antigo.setTelefone(novo.telefone());
-        if (novo.senha() != null)
+        if (novo.senha() != null) {
             antigo.setSenha(novo.senha());
-    }
-
-    public Usuario buscarUsuarioEntity(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("O usuário não foi encontrado"));
+            antigo.setSenha(encoder.encode(antigo.getSenha()));
+        }
     }
 
     private void verificarUsuarioAtivo(Usuario entity) {
-        if(entity.getAtivo())
+        if(!entity.getAtivo())
             throw new UsuarioInativoException("O usuário não está ativo.");
     }
-
-    private Usuario findByEmail(String email) {
-        return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
-    }
-
-
 }
