@@ -5,11 +5,10 @@ import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")
@@ -19,12 +18,12 @@ public class UsuarioController {
     private UsuarioService service;
 
     @PostMapping("/cadastro")
-    public ResponseEntity<UsuarioResponseDTO> cadastro(@RequestBody UsuarioCadastroDTO cadastro) {
+    public ResponseEntity<UsuarioResponseDTO> cadastro(@Valid @RequestBody UsuarioCadastroDTO cadastro) {
         return ResponseEntity.ok().body(service.criarUsuario(cadastro));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioLoginDTO login) {
+    public ResponseEntity<String> login(@Valid @RequestBody UsuarioLoginDTO login) {
         return ResponseEntity.ok().body(service.realizarLogin(login));
     }
 
@@ -40,7 +39,7 @@ public class UsuarioController {
     }
 
     @PatchMapping("/atualizar")
-    public ResponseEntity<UsuarioResponseDTO> atualizarDados (@RequestHeader("Authorization") String token, @RequestBody UsuarioAtualizacaoDTO dto) {
+    public ResponseEntity<UsuarioResponseDTO> atualizarDados (@RequestHeader("Authorization") String token, @Valid @RequestBody UsuarioAtualizacaoDTO dto) {
         return ResponseEntity.ok().body(service.atualizarUsuario(token, dto));
     }
 }

@@ -1,13 +1,18 @@
 package br.com.rafaelblomer.controllers.exceptions;
 
 import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
+import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.business.exceptions.UsuarioInativoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -31,5 +36,21 @@ public class ResourceExceptionHandler {
         HttpStatus status = HttpStatus.FORBIDDEN;
         StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Usuário não tem permissão para realizar essa ação.", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(DadoIrregularException.class)
+    public ResponseEntity<StandardError> dataConflictException(DadoIrregularException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Conflito de dados.", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+        return ResponseEntity.badRequest().body(errors);
     }
 }

@@ -25,6 +25,11 @@ public class EstoqueController {
         return ResponseEntity.ok().body(service.buscarTodosEstoquesUsuario(token));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<EstoqueResponseDTO> buscarUmEstoque(@RequestHeader("Authorization") String token, @PathVariable Long id) {
+        return ResponseEntity.ok().body(service.buscarUmEstoque(token, id));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<Void> desativarEstoque(@RequestHeader("Authorization") String token, @PathVariable Long id) {
         service.desativarEstoque(token, id);

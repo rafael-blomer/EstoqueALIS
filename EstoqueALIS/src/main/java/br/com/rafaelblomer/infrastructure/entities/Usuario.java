@@ -22,6 +22,7 @@ public class Usuario {
     @Column(unique = true)
     private String telefone;
     @NotBlank
+    @Size(min = 10)
     private String senha;
     @NotBlank
     @Size(min = 14, max = 14)

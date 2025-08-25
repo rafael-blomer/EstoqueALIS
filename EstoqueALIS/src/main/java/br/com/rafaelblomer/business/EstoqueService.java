@@ -31,9 +31,9 @@ public class EstoqueService {
     }
 
     public List<EstoqueResponseDTO> buscarTodosEstoquesUsuario(String token) {
-        return repository.findAll()
+        Usuario usuario = buscarUsuarioPorToken(token);
+        return repository.findByUsuario(usuario)
                 .stream()
-                .filter(e -> e.getUsuario().equals(buscarUsuarioPorToken(token)))
                 .map(e -> converter.entityParaResponseDTO(e))
                 .toList();
     }
@@ -44,6 +44,13 @@ public class EstoqueService {
         verificarEstoqueUsuario(estoque, usuario);
         estoque.setAtivo(false);
         repository.save(estoque);
+    }
+
+    public EstoqueResponseDTO buscarUmEstoque(String token, Long id) {
+        Usuario usuario = buscarUsuarioPorToken(token);
+        Estoque estoque = buscarEstoqueEntityId(id);
+        verificarEstoqueUsuario(estoque, usuario);
+        return converter.entityParaResponseDTO(estoque);
     }
 
     private Usuario buscarUsuarioPorToken(String token) {

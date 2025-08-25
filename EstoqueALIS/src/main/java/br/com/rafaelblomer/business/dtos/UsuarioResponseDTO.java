@@ -9,5 +9,5 @@ public record UsuarioResponseDTO(Long id,
                                  String email,
                                  String telefone,
                                  String cnpj,
-                                 List<Estoque> estoques) {
+                                 List<EstoqueResponseDTO> estoques) {
 }

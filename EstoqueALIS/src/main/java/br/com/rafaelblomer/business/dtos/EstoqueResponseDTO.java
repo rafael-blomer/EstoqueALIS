@@ -6,6 +6,5 @@ import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import java.util.List;
 
 public record EstoqueResponseDTO(Long id,
-                                 Usuario usuario,
                                  List<LoteProduto> lotes) {
 }

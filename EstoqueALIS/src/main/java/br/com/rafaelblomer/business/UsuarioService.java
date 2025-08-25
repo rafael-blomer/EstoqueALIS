@@ -5,6 +5,7 @@ import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
+import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.business.exceptions.UsuarioInativoException;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
@@ -51,6 +52,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
+        validarTelefone(antigo.getId(), novo.telefone());
         atualizarDadosUsuario(antigo, novo);
         repository.save(antigo);
         return converter.entityParaResponseDTO(antigo);
@@ -62,7 +64,6 @@ public class UsuarioService {
         repository.save(entity);
     }
 
-    //Criar exceção para login errado
     public String realizarLogin(UsuarioLoginDTO dto) {
         Usuario usuario = repository.findByEmail(dto.email()).orElseThrow(() -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
         verificarUsuarioAtivo(usuario);
@@ -89,5 +90,10 @@ public class UsuarioService {
     private void verificarUsuarioAtivo(Usuario entity) {
         if(!entity.getAtivo())
             throw new UsuarioInativoException("O usuário não está ativo.");
+    }
+
+    private void validarTelefone(Long id, String telefone) {
+        if(repository.existsByTelefoneAndIdNot(telefone, id))
+            throw new DadoIrregularException("Número de telefone irregular. Tente outro.");
     }
 }
