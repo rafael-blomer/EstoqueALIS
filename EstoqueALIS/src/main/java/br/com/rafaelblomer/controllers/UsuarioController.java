@@ -28,7 +28,7 @@ public class UsuarioController {
         return ResponseEntity.ok().body(service.realizarLogin(login));
     }
 
-    @GetMapping("/meuuser")
+    @GetMapping
     public ResponseEntity<UsuarioResponseDTO> buscarPorToken(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok().body(service.buscarUsuarioDTOToken(token));
     }

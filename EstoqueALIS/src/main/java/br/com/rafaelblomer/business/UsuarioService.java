@@ -44,7 +44,6 @@ public class UsuarioService {
         return converter.entityParaResponseDTO(repository.save(entity));
     }
 
-    //fazer exceção personalizada caso de erro ao buscar token
     public UsuarioResponseDTO buscarUsuarioDTOToken(String token) {
         Usuario usuario = findByToken(token);
         return converter.entityParaResponseDTO(usuario);
@@ -52,7 +51,6 @@ public class UsuarioService {
 
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
-        verificarUsuarioAtivo(antigo);
         atualizarDadosUsuario(antigo, novo);
         repository.save(antigo);
         return converter.entityParaResponseDTO(antigo);
@@ -67,8 +65,7 @@ public class UsuarioService {
     //Criar exceção para login errado
     public String realizarLogin(UsuarioLoginDTO dto) {
         Usuario usuario = repository.findByEmail(dto.email()).orElseThrow(() -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
-        if (!usuario.getAtivo())
-            throw new UsuarioInativoException("Usuario foi desativado");
+        verificarUsuarioAtivo(usuario);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwtToken = jwtUtil.generateToken(authentication.getName());
@@ -77,7 +74,7 @@ public class UsuarioService {
 
     public Usuario findByToken(String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7));
-        return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+        return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
     }
 
     private void atualizarDadosUsuario(Usuario antigo, UsuarioAtualizacaoDTO novo) {
@@ -85,10 +82,8 @@ public class UsuarioService {
             antigo.setNome(novo.nome());
         if (novo.telefone() != null)
             antigo.setTelefone(novo.telefone());
-        if (novo.senha() != null) {
-            antigo.setSenha(novo.senha());
-            antigo.setSenha(encoder.encode(antigo.getSenha()));
-        }
+        if (novo.senha() != null)
+            antigo.setSenha(encoder.encode(novo.senha()));
     }
 
     private void verificarUsuarioAtivo(Usuario entity) {

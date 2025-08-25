@@ -1,7 +1,7 @@
 package br.com.rafaelblomer.infrastructure.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ public class Estoque {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     @NotNull
+    @JsonIgnore
     private Usuario usuario;
     @OneToMany(mappedBy = "estoque", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoteProduto> lotes;

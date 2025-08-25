@@ -2,7 +2,10 @@ package br.com.rafaelblomer.business;
 
 import br.com.rafaelblomer.business.converters.EstoqueConverter;
 import br.com.rafaelblomer.business.dtos.EstoqueResponseDTO;
+import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
+import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
+import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.EstoqueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,12 +25,37 @@ public class EstoqueService {
     private UsuarioService usuarioService;
 
     public EstoqueResponseDTO criarNovoEstoque(String token) {
-        Estoque estoque = new Estoque(usuarioService.findByToken(token));
+        Estoque estoque = new Estoque(buscarUsuarioPorToken(token));
         repository.save(estoque);
         return converter.entityParaResponseDTO(estoque);
     }
 
-    public List<EstoqueResponseDTO> buscarTodosEstoques() {
-        return null;
+    public List<EstoqueResponseDTO> buscarTodosEstoquesUsuario(String token) {
+        return repository.findAll()
+                .stream()
+                .filter(e -> e.getUsuario().equals(buscarUsuarioPorToken(token)))
+                .map(e -> converter.entityParaResponseDTO(e))
+                .toList();
+    }
+
+    public void desativarEstoque(String token, Long id) {
+        Usuario usuario = buscarUsuarioPorToken(token);
+        Estoque estoque = buscarEstoqueEntityId(id);
+        verificarEstoqueUsuario(estoque, usuario);
+        estoque.setAtivo(false);
+        repository.save(estoque);
+    }
+
+    private Usuario buscarUsuarioPorToken(String token) {
+        return usuarioService.findByToken(token);
+    }
+
+    private Estoque buscarEstoqueEntityId(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Estoque não foi encontrado."));
+    }
+
+    private void verificarEstoqueUsuario(Estoque estoque, Usuario usuario) {
+        if(!estoque.getUsuario().equals(usuario))
+            throw new AcaoNaoPermitidaException("O usuário não tem permissão para fazer essa ação.");
     }
 }
