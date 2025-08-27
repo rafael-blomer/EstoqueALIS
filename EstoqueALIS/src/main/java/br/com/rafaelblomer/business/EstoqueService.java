@@ -57,7 +57,7 @@ public class EstoqueService {
         return usuarioService.findByToken(token);
     }
 
-    private Estoque buscarEstoqueEntityId(Long id) {
+    public Estoque buscarEstoqueEntityId(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Estoque não foi encontrado."));
     }
 

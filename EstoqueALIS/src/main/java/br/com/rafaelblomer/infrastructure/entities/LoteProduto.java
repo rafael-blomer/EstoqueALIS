@@ -3,6 +3,7 @@ package br.com.rafaelblomer.infrastructure.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
@@ -24,6 +25,7 @@ public class LoteProduto {
     @NotNull
     private LocalDate dataValidade;
     @NotBlank
+    @Size(max = 65)
     private String loteFabricante;
 
     public LoteProduto() {

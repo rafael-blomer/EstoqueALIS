@@ -7,7 +7,6 @@ import br.com.rafaelblomer.business.dtos.ProdutoResponseDTO;
 import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
-import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.ProdutoRepository;
@@ -28,10 +27,15 @@ public class ProdutoService {
     @Autowired
     private ProdutoConverter converter;
 
+    @Autowired
+    private EstoqueService estoqueService;
+
     public ProdutoResponseDTO criarProduto(ProdutoCadastroDTO dto) {
         Produto produto = converter.cadastroParaProdutoEntity(dto);
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.idEstoque());
+        produto.setEstoque(estoque);
         repository.save(produto);
-        return converter.entityParaResponseDTO(produto);
+        return converter.entityParaResponseDTO(produto, estoque);
     }
 
     public ProdutoResponseDTO atualizarProduto(Long idProduto, ProdutoAtualizacaoDTO dto, String token) {
@@ -39,21 +43,21 @@ public class ProdutoService {
         Usuario usuario = buscarUsuarioPorToken(token);
         verificarPermissaoProdutoUsuario(usuario, antigo);
         atualizarDadosProduto(antigo, dto);
-        return converter.entityParaResponseDTO(repository.save(antigo));
+        return converter.entityParaResponseDTO(repository.save(antigo), antigo.getEstoque());
     }
 
     public ProdutoResponseDTO buscarProdutoPorId(Long id, String token) {
         Produto produto = buscarProdutoId(id);
         Usuario usuario = buscarUsuarioPorToken(token);
         verificarPermissaoProdutoUsuario(usuario, produto);
-        return converter.entityParaResponseDTO(produto);
+        return converter.entityParaResponseDTO(produto, produto.getEstoque());
     }
 
     public List<ProdutoResponseDTO> buscarTodosProdutosUsuario(String token) {
         Usuario usuario = buscarUsuarioPorToken(token);
         return repository.buscarProdutosPorUsuario(usuario.getId())
                 .stream()
-                .map(p -> converter.entityParaResponseDTO(p))
+                .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
                 .toList();
     }
 
@@ -62,7 +66,7 @@ public class ProdutoService {
         verificarPermissaoEstoqueUsuario(estoqueId, usuario);
         return repository.buscarProdutosPorEstoque(estoqueId)
                 .stream()
-                .map(p -> converter.entityParaResponseDTO(p))
+                .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
                 .toList();
     }
 
@@ -78,14 +82,15 @@ public class ProdutoService {
         return usuarioService.findByToken(token);
     }
 
-    private Produto buscarProdutoId(Long id) {
+    public Produto buscarProdutoId(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Produto não encontrado"));
     }
 
-    private void verificarPermissaoProdutoUsuario(Usuario usuario, Produto produto) {
-        if (usuario.getEstoques().stream()
-                .flatMap(estoque -> estoque.getLotes().stream())
-                .noneMatch(lote -> lote.getProduto().equals(produto))) {
+    public void verificarPermissaoProdutoUsuario(Usuario usuario, Produto produto) {
+        boolean permitido = usuario.getEstoques().stream()
+                .anyMatch(estoque -> estoque.equals(produto.getEstoque()));
+
+        if (!permitido) {
             throw new AcaoNaoPermitidaException("Você não tem permissão para realizar essa ação.");
         }
     }

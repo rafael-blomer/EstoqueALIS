@@ -41,7 +41,7 @@ public class ResourceExceptionHandler {
     @ExceptionHandler(DadoIrregularException.class)
     public ResponseEntity<StandardError> dataConflictException(DadoIrregularException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
-        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Conflito de dados.", e.getMessage(), request.getRequestURI());
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Dado irregular passado.", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
 

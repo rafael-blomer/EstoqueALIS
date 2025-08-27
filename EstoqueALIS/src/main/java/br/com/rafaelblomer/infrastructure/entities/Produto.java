@@ -26,14 +26,18 @@ public class Produto {
     private Integer quantidadeTotal;
     @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LoteProduto> lotes;
+    @ManyToOne
+    @JoinColumn(name = "estoque_id")
+    private Estoque estoque;
 
-    public Produto(String nome, String marca, String descricao, Integer quantidadeTotal, List<LoteProduto> lotes) {
+    public Produto(String nome, String marca, String descricao, Integer quantidadeTotal, List<LoteProduto> lotes, Estoque estoque) {
         this.nome = nome;
         this.marca = marca;
         this.descricao = descricao;
         this.ativo = true;
         this.quantidadeTotal = quantidadeTotal;
         this.lotes = lotes;
+        this.estoque = estoque;
     }
 
     public Produto() {
@@ -93,6 +97,14 @@ public class Produto {
 
     public void setMarca(@NotBlank String marca) {
         this.marca = marca;
+    }
+
+    public Estoque getEstoque() {
+        return estoque;
+    }
+
+    public void setEstoque(Estoque estoque) {
+        this.estoque = estoque;
     }
 
     @Override
