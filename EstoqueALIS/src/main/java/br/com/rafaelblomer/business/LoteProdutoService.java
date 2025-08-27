@@ -1,6 +1,8 @@
 package br.com.rafaelblomer.business;
 
+import br.com.rafaelblomer.business.converters.LoteProdutoConverter;
 import br.com.rafaelblomer.business.dtos.LoteProdutoCadastroDTO;
+import br.com.rafaelblomer.business.dtos.LoteProdutoResponseDTO;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
@@ -28,26 +30,27 @@ public class LoteProdutoService {
     @Autowired
     private UsuarioService usuarioService;
 
-    public LoteProduto cadastrarLote(LoteProdutoCadastroDTO dto) {
+    @Autowired
+    private LoteProdutoConverter converter;
+
+    public LoteProdutoResponseDTO cadastrarLote(LoteProdutoCadastroDTO dto) {
         validarDto(dto);
-        LoteProduto loteProduto = fazerLoteProduto(dto);
-        return repository.save(loteProduto);
+        Estoque estoque = buscarEstoque(dto.estoqueId());
+        estoqueService.verificarEstoqueAtivo(estoque);
+        Produto produto = buscarProduto(dto.produtoId());
+        produtoService.verificarProdutoAtivo(produto);
+        LoteProduto loteProduto = converter.dtoParaLoteProdutoEntity(dto, estoque, produto);
+        return converter.paraLoteProdutoDTO(repository.save(loteProduto));
     }
 
-    public List<LoteProduto> buscarLotesPorProduto(Long produtoId, String token) {
+    public List<LoteProdutoResponseDTO> buscarLotesPorProduto(Long produtoId, String token) {
         Usuario usuario = usuarioService.findByToken(token);
         Produto produto = produtoService.buscarProdutoId(produtoId);
         produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
-        return repository.findByProdutoId(produtoId);
+        return repository.findByProdutoId(produtoId).stream().map(lp -> converter.paraLoteProdutoDTO(lp)).toList();
     }
 
-    private LoteProduto fazerLoteProduto(LoteProdutoCadastroDTO dto) {
-        return new LoteProduto(dto.dataValidade(),
-                buscarEstoque(dto.estoqueId()),
-                dto.loteFabricante(),
-                buscarProduto(dto.produtoId()),
-                dto.quantidadeLote());
-    }
+    //ÚTEIS
 
     private Produto buscarProduto(Long id) {
         return produtoService.buscarProdutoId(id);

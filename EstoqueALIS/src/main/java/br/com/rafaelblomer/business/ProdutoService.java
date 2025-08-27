@@ -5,6 +5,7 @@ import br.com.rafaelblomer.business.dtos.ProdutoAtualizacaoDTO;
 import br.com.rafaelblomer.business.dtos.ProdutoCadastroDTO;
 import br.com.rafaelblomer.business.dtos.ProdutoResponseDTO;
 import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
+import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
@@ -33,6 +34,7 @@ public class ProdutoService {
     public ProdutoResponseDTO criarProduto(ProdutoCadastroDTO dto) {
         Produto produto = converter.cadastroParaProdutoEntity(dto);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.idEstoque());
+        estoqueService.verificarEstoqueAtivo(estoque);
         produto.setEstoque(estoque);
         repository.save(produto);
         return converter.entityParaResponseDTO(produto, estoque);
@@ -40,6 +42,8 @@ public class ProdutoService {
 
     public ProdutoResponseDTO atualizarProduto(Long idProduto, ProdutoAtualizacaoDTO dto, String token) {
         Produto antigo = buscarProdutoId(idProduto);
+        verificarProdutoAtivo(antigo);
+        estoqueService.verificarEstoqueAtivo(antigo.getEstoque());
         Usuario usuario = buscarUsuarioPorToken(token);
         verificarPermissaoProdutoUsuario(usuario, antigo);
         atualizarDadosProduto(antigo, dto);
@@ -55,8 +59,10 @@ public class ProdutoService {
 
     public List<ProdutoResponseDTO> buscarTodosProdutosUsuario(String token) {
         Usuario usuario = buscarUsuarioPorToken(token);
-        return repository.buscarProdutosPorUsuario(usuario.getId())
+        return repository.findByEstoqueUsuarioId(usuario.getId())
                 .stream()
+                .filter(Produto::getAtivo)
+                .filter(p -> p.getEstoque().getAtivo())
                 .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
                 .toList();
     }
@@ -64,8 +70,9 @@ public class ProdutoService {
     public List<ProdutoResponseDTO> buscarTodosProdutosEstoque(Long estoqueId, String token) {
         Usuario usuario = buscarUsuarioPorToken(token);
         verificarPermissaoEstoqueUsuario(estoqueId, usuario);
-        return repository.buscarProdutosPorEstoque(estoqueId)
+        return repository.findByEstoqueId(estoqueId)
                 .stream()
+                .filter(Produto::getAtivo)
                 .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
                 .toList();
     }
@@ -73,10 +80,13 @@ public class ProdutoService {
     public void desativarProduto(Long id, String token) {
         Usuario usuario = buscarUsuarioPorToken(token);
         Produto produto = buscarProdutoId(id);
+        verificarProdutoAtivo(produto);
         verificarPermissaoProdutoUsuario(usuario, produto);
         produto.setAtivo(false);
         repository.save(produto);
     }
+
+    //ÚTEIS
 
     private Usuario buscarUsuarioPorToken(String token) {
         return usuarioService.findByToken(token);
@@ -84,6 +94,11 @@ public class ProdutoService {
 
     public Produto buscarProdutoId(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Produto não encontrado"));
+    }
+
+    public void verificarProdutoAtivo(Produto produto) {
+        if (!produto.getAtivo())
+            throw new DadoIrregularException("O produto foi desativado.");
     }
 
     public void verificarPermissaoProdutoUsuario(Usuario usuario, Produto produto) {

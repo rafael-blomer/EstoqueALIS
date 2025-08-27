@@ -5,6 +5,6 @@ import br.com.rafaelblomer.infrastructure.entities.Usuario;
 
 import java.util.List;
 
-public record EstoqueResponseDTO(Long id,
-                                 List<LoteProduto> lotes) {
+public record EstoqueResponseDTO(Long estoqueId,
+                                 Long usuarioId) {
 }

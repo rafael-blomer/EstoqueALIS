@@ -11,20 +11,7 @@ import java.util.List;
 @Repository
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    @Query("""
-        SELECT DISTINCT p
-        FROM Produto p
-        JOIN p.lotes l
-        JOIN l.estoque e
-        WHERE e.usuario.id = :usuarioId
-    """)
-    List<Produto> buscarProdutosPorUsuario(@Param("usuarioId") Long usuarioId);
+    List<Produto> findByEstoqueUsuarioId(Long usuarioId);
 
-    @Query("""
-        SELECT DISTINCT p
-        FROM Produto p
-        JOIN p.lotes l
-        WHERE l.estoque.id = :estoqueId
-    """)
-    List<Produto> buscarProdutosPorEstoque(@Param("estoqueId") Long estoqueId);
+    List<Produto> findByEstoqueId(Long estoqueId);
 }

@@ -3,7 +3,7 @@ package br.com.rafaelblomer.controllers.exceptions;
 import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
-import br.com.rafaelblomer.business.exceptions.UsuarioInativoException;
+import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +24,10 @@ public class ResourceExceptionHandler {
         return ResponseEntity.status(status).body(err);
     }
 
-    @ExceptionHandler(UsuarioInativoException.class)
-    public ResponseEntity<StandardError> inactiveUserException(UsuarioInativoException e, HttpServletRequest request) {
+    @ExceptionHandler(ObjetoInativoException.class)
+    public ResponseEntity<StandardError> inactiveUserException(ObjetoInativoException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;
-        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Usuário foi desativado.", e.getMessage(), request.getRequestURI());
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Objeto foi desativado.", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
 

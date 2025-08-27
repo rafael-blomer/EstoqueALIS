@@ -7,7 +7,7 @@ import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
-import br.com.rafaelblomer.business.exceptions.UsuarioInativoException;
+import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
 import br.com.rafaelblomer.infrastructure.security.JwtUtil;
@@ -52,6 +52,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
+        verificarUsuarioAtivo(antigo);
         validarTelefone(antigo.getId(), novo.telefone());
         atualizarDadosUsuario(antigo, novo);
         repository.save(antigo);
@@ -73,6 +74,8 @@ public class UsuarioService {
         return "Bearer " + jwtToken;
     }
 
+    //ÚTEIS
+
     public Usuario findByToken(String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7));
         return repository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
@@ -89,7 +92,7 @@ public class UsuarioService {
 
     private void verificarUsuarioAtivo(Usuario entity) {
         if(!entity.getAtivo())
-            throw new UsuarioInativoException("O usuário não está ativo.");
+            throw new ObjetoInativoException("O usuário não está ativo.");
     }
 
     private void validarTelefone(Long id, String telefone) {
