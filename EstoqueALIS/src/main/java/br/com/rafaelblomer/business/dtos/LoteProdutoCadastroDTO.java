@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record LoteProdutoCadastroDTO(@NotNull Long produtoId,
-                                     @NotNull Long estoqueId,
                                      @NotNull Integer quantidadeLote,
                                      @NotNull LocalDate dataValidade,
                                      @NotNull @Size(max = 65) String loteFabricante) {

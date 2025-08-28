@@ -22,9 +22,6 @@ public class LoteProdutoService {
     private LoteProdutoRepository repository;
 
     @Autowired
-    private EstoqueService estoqueService;
-
-    @Autowired
     private ProdutoService produtoService;
 
     @Autowired
@@ -35,11 +32,9 @@ public class LoteProdutoService {
 
     public LoteProdutoResponseDTO cadastrarLote(LoteProdutoCadastroDTO dto) {
         validarDto(dto);
-        Estoque estoque = buscarEstoque(dto.estoqueId());
-        estoqueService.verificarEstoqueAtivo(estoque);
-        Produto produto = buscarProduto(dto.produtoId());
+        Produto produto = produtoService.buscarProdutoId(dto.produtoId());
         produtoService.verificarProdutoAtivo(produto);
-        LoteProduto loteProduto = converter.dtoParaLoteProdutoEntity(dto, estoque, produto);
+        LoteProduto loteProduto = converter.dtoParaLoteProdutoEntity(dto, produto);
         return converter.paraLoteProdutoDTO(repository.save(loteProduto));
     }
 
@@ -51,14 +46,6 @@ public class LoteProdutoService {
     }
 
     //ÚTEIS
-
-    private Produto buscarProduto(Long id) {
-        return produtoService.buscarProdutoId(id);
-    }
-
-    private Estoque buscarEstoque(Long id) {
-        return estoqueService.buscarEstoqueEntityId(id);
-    }
 
     private void validarDto(LoteProdutoCadastroDTO dto) {
         if (dto.quantidadeLote() <= 0)

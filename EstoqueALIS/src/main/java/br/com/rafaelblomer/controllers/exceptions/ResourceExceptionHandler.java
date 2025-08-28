@@ -5,6 +5,7 @@ import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,11 +47,25 @@ public class ResourceExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
+        e.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
         return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, String> response = new HashMap<>();
+        String mensagem = "Violação de integridade de dados.";
+        if (ex.getMostSpecificCause().getMessage().contains("cnpj"))
+            mensagem = "Já existe um usuário com esse CNPJ.";
+        else if (ex.getMostSpecificCause().getMessage().contains("email"))
+            mensagem = "Já existe um usuário com esse e-mail.";
+        else if (ex.getMostSpecificCause().getMessage().contains("telefone"))
+            mensagem = "Já existe um usuário com esse telefone.";
+        response.put("erro", mensagem);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }

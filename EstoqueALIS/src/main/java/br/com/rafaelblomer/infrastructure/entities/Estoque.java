@@ -20,14 +20,11 @@ public class Estoque {
     @JsonIgnore
     private Usuario usuario;
     @OneToMany(mappedBy = "estoque", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LoteProduto> lotes;
-    @OneToMany(mappedBy = "estoque", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MovimentacaoEstoque> movimentacoes;
 
     public Estoque(Usuario usuario) {
         this.ativo = true;
         this.usuario = usuario;
-        this.lotes = new ArrayList<>();
         this.movimentacoes = new ArrayList<>();
     }
 
@@ -56,14 +53,6 @@ public class Estoque {
 
     public void setUsuario(@NotNull Usuario usuario) {
         this.usuario = usuario;
-    }
-
-    public List<LoteProduto> getLotes() {
-        return lotes;
-    }
-
-    public void setLotes(List<LoteProduto> lotes) {
-        this.lotes = lotes;
     }
 
     public List<MovimentacaoEstoque> getMovimentacoes() {

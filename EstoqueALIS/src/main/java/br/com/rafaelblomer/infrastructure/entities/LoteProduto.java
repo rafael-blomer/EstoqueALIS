@@ -17,10 +17,6 @@ public class LoteProduto {
     @JoinColumn(name = "produto_id")
     private Produto produto;
     @NotNull
-    @ManyToOne
-    @JoinColumn(name = "estoque_id")
-    private Estoque estoque;
-    @NotNull
     private Integer quantidadeLote;
     @NotNull
     private LocalDate dataValidade;
@@ -31,9 +27,8 @@ public class LoteProduto {
     public LoteProduto() {
     }
 
-    public LoteProduto(LocalDate dataValidade, Estoque estoque, String loteFabricante, Produto produto, Integer quantidadeLote) {
+    public LoteProduto(LocalDate dataValidade, String loteFabricante, Produto produto, Integer quantidadeLote) {
         this.dataValidade = dataValidade;
-        this.estoque = estoque;
         this.loteFabricante = loteFabricante;
         this.produto = produto;
         this.quantidadeLote = quantidadeLote;
@@ -45,14 +40,6 @@ public class LoteProduto {
 
     public void setDataValidade(@NotNull LocalDate dataValidade) {
         this.dataValidade = dataValidade;
-    }
-
-    public @NotNull Estoque getEstoque() {
-        return estoque;
-    }
-
-    public void setEstoque(@NotNull Estoque estoque) {
-        this.estoque = estoque;
     }
 
     public Long getId() {

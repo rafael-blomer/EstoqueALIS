@@ -27,13 +27,13 @@ public class EstoqueService {
     private UsuarioService usuarioService;
 
     public EstoqueResponseDTO criarNovoEstoque(String token) {
-        Estoque estoque = new Estoque(buscarUsuarioPorToken(token));
+        Estoque estoque = new Estoque(usuarioService.findByToken(token));
         repository.save(estoque);
         return converter.entityParaResponseDTO(estoque);
     }
 
     public List<EstoqueResponseDTO> buscarTodosEstoquesUsuario(String token) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         return repository.findByUsuario(usuario)
                 .stream()
                 .filter(Estoque::getAtivo)
@@ -42,7 +42,7 @@ public class EstoqueService {
     }
 
     public void desativarEstoque(String token, Long id) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = buscarEstoqueEntityId(id);
         verificarEstoqueUsuario(estoque, usuario);
         estoque.setAtivo(false);
@@ -50,17 +50,13 @@ public class EstoqueService {
     }
 
     public EstoqueResponseDTO buscarUmEstoque(String token, Long id) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = buscarEstoqueEntityId(id);
         verificarEstoqueUsuario(estoque, usuario);
         return converter.entityParaResponseDTO(estoque);
     }
 
     //ÚTEIS
-
-    private Usuario buscarUsuarioPorToken(String token) {
-        return usuarioService.findByToken(token);
-    }
 
     public Estoque buscarEstoqueEntityId(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Estoque não foi encontrado."));
@@ -71,7 +67,7 @@ public class EstoqueService {
             throw new ObjetoInativoException("Estoque não está ativo");
     }
 
-    private void verificarEstoqueUsuario(Estoque estoque, Usuario usuario) {
+    public void verificarEstoqueUsuario(Estoque estoque, Usuario usuario) {
         if(!estoque.getUsuario().equals(usuario))
             throw new AcaoNaoPermitidaException("O usuário não tem permissão para fazer essa ação.");
     }

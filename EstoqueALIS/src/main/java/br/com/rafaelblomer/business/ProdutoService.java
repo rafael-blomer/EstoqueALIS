@@ -31,10 +31,12 @@ public class ProdutoService {
     @Autowired
     private EstoqueService estoqueService;
 
-    public ProdutoResponseDTO criarProduto(ProdutoCadastroDTO dto) {
+    public ProdutoResponseDTO criarProduto(ProdutoCadastroDTO dto, String token) {
+        Usuario usuario = usuarioService.findByToken(token);
         Produto produto = converter.cadastroParaProdutoEntity(dto);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.idEstoque());
         estoqueService.verificarEstoqueAtivo(estoque);
+        estoqueService.verificarEstoqueUsuario(estoque, usuario);
         produto.setEstoque(estoque);
         repository.save(produto);
         return converter.entityParaResponseDTO(produto, estoque);
@@ -44,7 +46,7 @@ public class ProdutoService {
         Produto antigo = buscarProdutoId(idProduto);
         verificarProdutoAtivo(antigo);
         estoqueService.verificarEstoqueAtivo(antigo.getEstoque());
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoProdutoUsuario(usuario, antigo);
         atualizarDadosProduto(antigo, dto);
         return converter.entityParaResponseDTO(repository.save(antigo), antigo.getEstoque());
@@ -52,13 +54,13 @@ public class ProdutoService {
 
     public ProdutoResponseDTO buscarProdutoPorId(Long id, String token) {
         Produto produto = buscarProdutoId(id);
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoProdutoUsuario(usuario, produto);
         return converter.entityParaResponseDTO(produto, produto.getEstoque());
     }
 
     public List<ProdutoResponseDTO> buscarTodosProdutosUsuario(String token) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         return repository.findByEstoqueUsuarioId(usuario.getId())
                 .stream()
                 .filter(Produto::getAtivo)
@@ -68,7 +70,7 @@ public class ProdutoService {
     }
 
     public List<ProdutoResponseDTO> buscarTodosProdutosEstoque(Long estoqueId, String token) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoEstoqueUsuario(estoqueId, usuario);
         return repository.findByEstoqueId(estoqueId)
                 .stream()
@@ -78,7 +80,7 @@ public class ProdutoService {
     }
 
     public void desativarProduto(Long id, String token) {
-        Usuario usuario = buscarUsuarioPorToken(token);
+        Usuario usuario = usuarioService.findByToken(token);
         Produto produto = buscarProdutoId(id);
         verificarProdutoAtivo(produto);
         verificarPermissaoProdutoUsuario(usuario, produto);
@@ -87,10 +89,6 @@ public class ProdutoService {
     }
 
     //ÚTEIS
-
-    private Usuario buscarUsuarioPorToken(String token) {
-        return usuarioService.findByToken(token);
-    }
 
     public Produto buscarProdutoId(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Produto não encontrado"));

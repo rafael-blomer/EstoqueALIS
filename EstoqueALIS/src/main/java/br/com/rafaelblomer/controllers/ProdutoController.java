@@ -19,8 +19,8 @@ public class ProdutoController {
     private ProdutoService service;
 
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> criarNovoProduto(@RequestBody @Valid ProdutoCadastroDTO dto) {
-        return ResponseEntity.ok().body(service.criarProduto(dto));
+    public ResponseEntity<ProdutoResponseDTO> criarNovoProduto(@RequestHeader("Authorization") String token, @RequestBody @Valid ProdutoCadastroDTO dto) {
+        return ResponseEntity.ok().body(service.criarProduto(dto, token));
     }
 
     @PatchMapping("/atualizar/{id}")
