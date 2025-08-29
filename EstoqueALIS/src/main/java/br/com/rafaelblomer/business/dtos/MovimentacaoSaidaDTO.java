@@ -1,4 +1,9 @@
 package br.com.rafaelblomer.business.dtos;
 
-public record MovimentacaoSaidaDTO() {
+import jakarta.validation.constraints.NotNull;
+
+import java.util.List;
+
+public record MovimentacaoSaidaDTO(@NotNull Long estoqueId,
+                                   @NotNull List<ItemMovimentacaoLoteDTO> ItensMovimentacaoLote) {
 }

@@ -28,6 +28,9 @@ public class LoteProdutoService {
     private UsuarioService usuarioService;
 
     @Autowired
+    private MovimentacaoEstoqueService movimentacaoEstoqueService;
+
+    @Autowired
     private LoteProdutoConverter converter;
 
     public LoteProdutoResponseDTO cadastrarLote(LoteProdutoCadastroDTO dto) {
@@ -35,7 +38,9 @@ public class LoteProdutoService {
         Produto produto = produtoService.buscarProdutoId(dto.produtoId());
         produtoService.verificarProdutoAtivo(produto);
         LoteProduto loteProduto = converter.dtoParaLoteProdutoEntity(dto, produto);
-        return converter.paraLoteProdutoDTO(repository.save(loteProduto));
+        repository.save(loteProduto);
+        movimentacaoEstoqueService.registrarEntrada(loteProduto);
+        return converter.paraLoteProdutoDTO(loteProduto);
     }
 
     public List<LoteProdutoResponseDTO> buscarLotesPorProduto(Long produtoId, String token) {
