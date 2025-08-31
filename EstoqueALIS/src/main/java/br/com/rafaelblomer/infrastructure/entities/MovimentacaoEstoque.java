@@ -1,12 +1,20 @@
 package br.com.rafaelblomer.infrastructure.entities;
 
-import br.com.rafaelblomer.infrastructure.entities.enums.TipoMovimentacao;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import br.com.rafaelblomer.infrastructure.entities.enums.TipoMovimentacao;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class MovimentacaoEstoque {

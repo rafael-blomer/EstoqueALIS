@@ -1,5 +1,10 @@
 package br.com.rafaelblomer.business;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import br.com.rafaelblomer.business.converters.ProdutoConverter;
 import br.com.rafaelblomer.business.dtos.ProdutoAtualizacaoDTO;
 import br.com.rafaelblomer.business.dtos.ProdutoCadastroDTO;
@@ -11,10 +16,6 @@ import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.ProdutoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ProdutoService {

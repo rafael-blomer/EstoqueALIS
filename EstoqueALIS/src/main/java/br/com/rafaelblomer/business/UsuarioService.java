@@ -1,16 +1,5 @@
 package br.com.rafaelblomer.business;
 
-import br.com.rafaelblomer.business.converters.UsuarioConverter;
-import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
-import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
-import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
-import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
-import br.com.rafaelblomer.infrastructure.entities.Usuario;
-import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
-import br.com.rafaelblomer.infrastructure.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +8,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import br.com.rafaelblomer.business.converters.UsuarioConverter;
+import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
+import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
+import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
+import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
+import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
+import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
+import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
+import br.com.rafaelblomer.infrastructure.entities.Usuario;
+import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
+import br.com.rafaelblomer.infrastructure.security.JwtUtil;
 
 @Service
 public class UsuarioService {

@@ -1,18 +1,18 @@
 package br.com.rafaelblomer.business;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import br.com.rafaelblomer.business.converters.EstoqueConverter;
 import br.com.rafaelblomer.business.dtos.EstoqueResponseDTO;
 import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
-import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.EstoqueRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class EstoqueService {
