@@ -2,6 +2,10 @@ package br.com.rafaelblomer.business;
 
 import java.util.List;
 
+import br.com.rafaelblomer.business.dtos.MovimentacaoSaidaDTO;
+import br.com.rafaelblomer.infrastructure.entities.Estoque;
+import br.com.rafaelblomer.infrastructure.entities.MovimentacaoEstoque;
+import br.com.rafaelblomer.infrastructure.entities.Produto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +26,29 @@ public class MovimentacaoEstoqueService {
     @Autowired
     private EstoqueService estoqueService;
 
-    /*public MovimentacaoEstoqueResponseDTO registrarSaida(MovimentacaoSaidaDTO dto) {
-        Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.estoqueId());
+    @Autowired
+    private ProdutoService produtoService;
 
-        MovimentacaoEstoque movEstoque = converter.dtoSaidaParaMovEstoqueEntity(dto, estoque);
-        return null;
-    }*/
+    @Autowired
+    private RelatorioService relatorioService;
+
+    //List<LoteProduto> findByProdutoIdAndQuantidadeLoteGreaterThanOrderByDataValidadeAsc(Long produtoId, int quantidade);
+    @Autowired
+    private
+
+    public MovimentacaoEstoqueResponseDTO registrarSaida(MovimentacaoSaidaDTO dto) {
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.estoqueId());
+        estoqueService.verificarEstoqueAtivo(estoque);
+        Produto produto = produtoService.buscarProdutoId(dto.produtoId());
+        produtoService.verificarProdutoAtivo(produto);
+        relatorioService.calcularQuantidadeTotalProduto(produto);
+        if (dto.quantidade() > produto.getQuantidadeTotal())
+            throw new IllegalArgumentException();
+        MovimentacaoEstoque movEstoque = converter.saidaDtoParaEntity(dto, estoque);
+
+        repository.save(movEstoque);
+        return converter.movEstoqueEntityParaDto(movEstoque);
+    }
 
     //fazer por usuario
     public List<MovimentacaoEstoqueResponseDTO> historicoMovimentacoes(Long estoqueId) {

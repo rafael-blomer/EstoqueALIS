@@ -1,4 +1,13 @@
 package br.com.rafaelblomer.business.dtos;
 
-public record MovimentacaoEstoqueResponseDTO() {
+import br.com.rafaelblomer.infrastructure.entities.enums.TipoMovimentacao;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record MovimentacaoEstoqueResponseDTO(Long id,
+                                             EstoqueResponseDTO estoque,
+                                             LocalDateTime dataHora,
+                                             TipoMovimentacao tipoMovimentacao,
+                                             List<ItemMovimentacaoLoteResponseDTO> itensMovimentacoesLote) {
 }

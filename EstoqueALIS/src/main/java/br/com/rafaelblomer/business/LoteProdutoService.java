@@ -3,6 +3,7 @@ package br.com.rafaelblomer.business;
 import java.time.LocalDate;
 import java.util.List;
 
+import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,5 +58,9 @@ public class LoteProdutoService {
             throw new DadoIrregularException("A quantidade total do lote tem que ser maior que 0.");
         if (dto.dataValidade().isBefore(LocalDate.now()))
             throw new DadoIrregularException("A data de validade tem que ser após a data atual");
+    }
+
+    public LoteProduto buscarLoteProdutoEntity(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Lote de produot não encontrado."));
     }
 }

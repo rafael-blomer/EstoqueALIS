@@ -10,4 +10,6 @@ import java.util.List;
 public interface LoteProdutoRepository extends JpaRepository<LoteProduto, Long> {
 
     List<LoteProduto> findByProdutoId(Long produtoId);
+
+    List<LoteProduto> findByProdutoIdAndQuantidadeLoteGreaterThanOrderByDataValidadeAsc(Long produtoId, int quantidade);
 }
