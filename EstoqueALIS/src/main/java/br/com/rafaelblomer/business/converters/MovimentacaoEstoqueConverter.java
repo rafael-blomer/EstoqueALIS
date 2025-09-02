@@ -50,7 +50,6 @@ public class MovimentacaoEstoqueConverter {
     public MovimentacaoEstoqueResponseDTO movEstoqueEntityParaDto(MovimentacaoEstoque movEstoque) {
         return new MovimentacaoEstoqueResponseDTO(
                 movEstoque.getId(),
-                estoqueConverter.entityParaResponseDTO(movEstoque.getEstoque()),
                 movEstoque.getDataHora(),
                 movEstoque.getTipoMov(),
                 movEstoque.getItensMovimentacao().stream().map(this::itemMovLoteEntityParaDto).toList());
@@ -68,7 +67,12 @@ public class MovimentacaoEstoqueConverter {
     private ItemMovimentacaoLoteResponseDTO itemMovLoteEntityParaDto(ItemMovimentacaoLote entity) {
         return new ItemMovimentacaoLoteResponseDTO(
                 entity.getId(),
-                loteProdutoConverter.paraLoteProdutoDTO(entity.getLoteProduto()),
-                entity.getQuantidade());
+                entity.getLoteProduto().getId(),
+                entity.getQuantidade(),
+                entity.getLoteProduto().getLoteFabricante(),
+                entity.getLoteProduto().getProduto().getId(),
+                entity.getLoteProduto().getProduto().getNome(),
+                entity.getLoteProduto().getProduto().getMarca(),
+                entity.getLoteProduto().getProduto().getDescricao());
     }
 }

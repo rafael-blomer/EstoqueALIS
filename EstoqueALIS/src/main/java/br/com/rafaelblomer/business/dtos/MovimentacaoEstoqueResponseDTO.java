@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record MovimentacaoEstoqueResponseDTO(Long id,
-                                             EstoqueResponseDTO estoque,
                                              LocalDateTime dataHora,
                                              TipoMovimentacao tipoMovimentacao,
                                              List<ItemMovimentacaoLoteResponseDTO> itensMovimentacoesLote) {

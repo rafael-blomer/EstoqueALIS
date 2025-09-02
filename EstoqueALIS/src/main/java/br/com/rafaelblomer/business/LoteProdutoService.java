@@ -69,4 +69,8 @@ public class LoteProdutoService {
     public List<LoteProduto> buscarLoteProdutoPorDataValidade(Long produtoId) {
         return repository.findLotesDisponiveisOrdenadosPorValidade(produtoId);
     }
+
+    public void salvarAlteracoes(List<LoteProduto> alterados) {
+        repository.saveAll(alterados);
+    }
 }
