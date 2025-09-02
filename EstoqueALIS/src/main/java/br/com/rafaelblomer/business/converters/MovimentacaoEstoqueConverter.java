@@ -18,14 +18,12 @@ import br.com.rafaelblomer.infrastructure.entities.enums.TipoMovimentacao;
 public class MovimentacaoEstoqueConverter {
 
     @Autowired
-    private LoteProdutoService loteProdutoService;
-
-    @Autowired
     private EstoqueConverter estoqueConverter;
 
     @Autowired
     private LoteProdutoConverter loteProdutoConverter;
 
+    //ENTRADA
     public MovimentacaoEstoque loteProdParaMovEstoque(LoteProduto loteProduto) {
         MovimentacaoEstoque movimentacaoEstoque = new MovimentacaoEstoque();
         movimentacaoEstoque.setEstoque(loteProduto.getProduto().getEstoque());
@@ -36,12 +34,15 @@ public class MovimentacaoEstoqueConverter {
         return movimentacaoEstoque;
     }
 
-    public MovimentacaoEstoque saidaDtoParaEntity(MovimentacaoSaidaDTO dto, Estoque estoque) {
+    public MovimentacaoEstoque saidaDtoParaEntity(Estoque estoque, List<LoteProduto> listLoteProduto) {
         MovimentacaoEstoque movEstoque = new MovimentacaoEstoque();
         movEstoque.setDataHora(LocalDateTime.now());
         movEstoque.setTipoMov(TipoMovimentacao.SAIDA);
         movEstoque.setEstoque(estoque);
         List<ItemMovimentacaoLote> list = new ArrayList<>();
+        for (LoteProduto lt : listLoteProduto) {
+            list.add(gerarItemMovimentacaoLote(lt, movEstoque));
+        }
         movEstoque.setItensMovimentacao(list);
         return movEstoque;
     }
@@ -55,17 +56,13 @@ public class MovimentacaoEstoqueConverter {
                 movEstoque.getItensMovimentacao().stream().map(this::itemMovLoteEntityParaDto).toList());
     }
 
+    //ENTRADA
     private ItemMovimentacaoLote gerarItemMovimentacaoLote(LoteProduto loteProduto, MovimentacaoEstoque movimentacaoEstoque) {
         ItemMovimentacaoLote itemMovimentacaoLote = new ItemMovimentacaoLote();
         itemMovimentacaoLote.setLoteProduto(loteProduto);
         itemMovimentacaoLote.setMovimentacaoEstoque(movimentacaoEstoque);
         itemMovimentacaoLote.setQuantidade(loteProduto.getQuantidadeLote());
         return itemMovimentacaoLote;
-    }
-
-    private ItemMovimentacaoLote itemMovLoteDtoParaEntity(ItemMovimentacaoLoteDTO dto, MovimentacaoEstoque movimentacaoEstoque) {
-        LoteProduto loteProduto = loteProdutoService.buscarLoteProdutoEntity(dto.loteProdutoId());
-        return new ItemMovimentacaoLote(loteProduto, movimentacaoEstoque, dto.quantidade());
     }
 
     private ItemMovimentacaoLoteResponseDTO itemMovLoteEntityParaDto(ItemMovimentacaoLote entity) {

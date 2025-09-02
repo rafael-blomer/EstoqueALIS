@@ -2,6 +2,8 @@ package br.com.rafaelblomer.infrastructure.repositories;
 
 import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,5 +13,7 @@ public interface LoteProdutoRepository extends JpaRepository<LoteProduto, Long> 
 
     List<LoteProduto> findByProdutoId(Long produtoId);
 
-    List<LoteProduto> findByProdutoIdAndQuantidadeLoteGreaterThanOrderByDataValidadeAsc(Long produtoId, int quantidade);
-}
+    @Query("SELECT l FROM LoteProduto l " +
+            "WHERE l.produto.id = :produtoId AND l.quantidadeLote > 0 " +
+            "ORDER BY l.dataValidade ASC")
+    List<LoteProduto> findLotesDisponiveisOrdenadosPorValidade(@Param("produtoId") Long produtoId);}

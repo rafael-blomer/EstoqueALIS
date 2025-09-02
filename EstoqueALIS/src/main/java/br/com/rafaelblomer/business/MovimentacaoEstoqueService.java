@@ -6,7 +6,9 @@ import br.com.rafaelblomer.business.dtos.MovimentacaoSaidaDTO;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.MovimentacaoEstoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
+import br.com.rafaelblomer.infrastructure.event.LoteCriadoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import br.com.rafaelblomer.business.converters.MovimentacaoEstoqueConverter;
@@ -32,20 +34,17 @@ public class MovimentacaoEstoqueService {
     @Autowired
     private RelatorioService relatorioService;
 
-    //List<LoteProduto> findByProdutoIdAndQuantidadeLoteGreaterThanOrderByDataValidadeAsc(Long produtoId, int quantidade);
     @Autowired
-    private
+    private LoteProdutoService loteProdutoService;
 
     public MovimentacaoEstoqueResponseDTO registrarSaida(MovimentacaoSaidaDTO dto) {
         Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.estoqueId());
         estoqueService.verificarEstoqueAtivo(estoque);
         Produto produto = produtoService.buscarProdutoId(dto.produtoId());
         produtoService.verificarProdutoAtivo(produto);
-        relatorioService.calcularQuantidadeTotalProduto(produto);
-        if (dto.quantidade() > produto.getQuantidadeTotal())
-            throw new IllegalArgumentException();
-        MovimentacaoEstoque movEstoque = converter.saidaDtoParaEntity(dto, estoque);
-
+        verificarQuantidadeTotalProduto(dto, produto);
+        List<LoteProduto> listLoteProduto = loteProdutoService.buscarLoteProdutoPorDataValidade(produto.getId());
+        MovimentacaoEstoque movEstoque = converter.saidaDtoParaEntity(estoque, listLoteProduto);
         repository.save(movEstoque);
         return converter.movEstoqueEntityParaDto(movEstoque);
     }
@@ -57,7 +56,14 @@ public class MovimentacaoEstoqueService {
 
     //ÚTEIS
 
-    public void registrarEntrada(LoteProduto loteProduto) {
-        repository.save(converter.loteProdParaMovEstoque(loteProduto));
+    @EventListener
+    public void registrarEntrada(LoteCriadoEvent event) {
+        repository.save(converter.loteProdParaMovEstoque(event.getLoteProduto()));
+    }
+
+    private void verificarQuantidadeTotalProduto(MovimentacaoSaidaDTO dto, Produto produto) {
+        relatorioService.calcularQuantidadeTotalProduto(produto);
+        if (dto.quantidade() > produto.getQuantidadeTotal())
+            throw new IllegalArgumentException();
     }
 }

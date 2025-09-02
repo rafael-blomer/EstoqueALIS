@@ -3,13 +3,15 @@ package br.com.rafaelblomer.business;
 import java.time.LocalDate;
 import java.util.List;
 
+import br.com.rafaelblomer.business.dtos.LoteProdutoResponseDTO;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
+import br.com.rafaelblomer.infrastructure.event.LoteCriadoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import br.com.rafaelblomer.business.converters.LoteProdutoConverter;
 import br.com.rafaelblomer.business.dtos.LoteProdutoCadastroDTO;
-import br.com.rafaelblomer.business.dtos.LoteProdutoResponseDTO;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
@@ -29,7 +31,7 @@ public class LoteProdutoService {
     private UsuarioService usuarioService;
 
     @Autowired
-    private MovimentacaoEstoqueService movimentacaoEstoqueService;
+    private ApplicationEventPublisher publisher;
 
     @Autowired
     private LoteProdutoConverter converter;
@@ -40,7 +42,7 @@ public class LoteProdutoService {
         produtoService.verificarProdutoAtivo(produto);
         LoteProduto loteProduto = converter.dtoParaLoteProdutoEntity(dto, produto);
         repository.save(loteProduto);
-        movimentacaoEstoqueService.registrarEntrada(loteProduto);
+        publisher.publishEvent(new LoteCriadoEvent(loteProduto));
         return converter.paraLoteProdutoDTO(loteProduto);
     }
 
@@ -62,5 +64,9 @@ public class LoteProdutoService {
 
     public LoteProduto buscarLoteProdutoEntity(Long id) {
         return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Lote de produot não encontrado."));
+    }
+
+    public List<LoteProduto> buscarLoteProdutoPorDataValidade(Long produtoId) {
+        return repository.findLotesDisponiveisOrdenadosPorValidade(produtoId);
     }
 }
