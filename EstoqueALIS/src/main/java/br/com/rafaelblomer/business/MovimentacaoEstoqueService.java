@@ -1,5 +1,6 @@
 package br.com.rafaelblomer.business;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,9 @@ public class MovimentacaoEstoqueService {
     @Autowired
     private LoteProdutoService loteProdutoService;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     public MovimentacaoEstoqueResponseDTO registrarSaida(MovimentacaoSaidaDTO dto) {
         Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.estoqueId());
         estoqueService.verificarEstoqueAtivo(estoque);
@@ -54,9 +58,52 @@ public class MovimentacaoEstoqueService {
         return converter.movEstoqueEntityParaDto(movEstoque);
     }
 
-    //fazer por usuario
-    public List<MovimentacaoEstoqueResponseDTO> historicoMovimentacoes(Long estoqueId) {
-        return null;
+    public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesEstoque(String token, Long estoqueId) {
+        Usuario usuario = usuarioService.findByToken(token);
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
+        estoqueService.verificarEstoqueAtivo(estoque);
+        estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        return repository.findByEstoqueId(estoque.getId()).stream().map(converter::movEstoqueEntityParaDto).toList();
+    }
+
+    public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesProduto(String token, Long estoqueId, Long produtoId) {
+        Usuario usuario = usuarioService.findByToken(token);
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
+        Produto produto = produtoService.buscarProdutoId(produtoId);
+        produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
+        estoqueService.verificarEstoqueAtivo(estoque);
+        estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        return repository.listarHistoricoMovimentacoesProduto(produtoId, estoqueId).stream()
+                .map(converter::movEstoqueEntityParaDto)
+                .toList();
+    }
+
+    public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesData(String token, Long estoqueId, LocalDate dataInicio, LocalDate dataFinal) {
+        Usuario usuario = usuarioService.findByToken(token);
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
+        estoqueService.verificarEstoqueAtivo(estoque);
+        estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        LocalDateTime dataHoraInicio = dataInicio.atStartOfDay();
+        LocalDateTime dataHoraFinal = dataFinal.atTime(23, 59, 59);
+        return  repository.findByEstoqueIdAndDataHoraBetween(estoqueId, dataHoraInicio, dataHoraFinal)
+                .stream()
+                .map(converter::movEstoqueEntityParaDto)
+                .toList();
+    }
+
+    public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesProdutoEData(String token, Long estoqueId, Long produtoId, LocalDate dataInicio, LocalDate dataFinal) {
+        Usuario usuario = usuarioService.findByToken(token);
+        Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
+        Produto produto = produtoService.buscarProdutoId(produtoId);
+        produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
+        estoqueService.verificarEstoqueAtivo(estoque);
+        estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        LocalDateTime dataHoraInicio = dataInicio.atStartOfDay();
+        LocalDateTime dataHoraFinal = dataFinal.atTime(23, 59, 59);
+        return repository.listarHistoricoMovimentacoesProdutoEData(produtoId, estoqueId, dataHoraInicio, dataHoraFinal)
+                .stream()
+                .map(converter::movEstoqueEntityParaDto)
+                .toList();
     }
 
     //ÚTEIS
@@ -87,13 +134,13 @@ public class MovimentacaoEstoqueService {
                 quantidadeDesejada -= retirada;
                 lt.setQuantidadeLote(0);
             }
-            ItemMovimentacaoLote item = new ItemMovimentacaoLote();
-            item.setMovimentacaoEstoque(movEstoque);
-            item.setLoteProduto(lt);
-            item.setQuantidade(retirada);
-            itens.add(item);
+            itens.add(gerarItemMovimentacaoLote(movEstoque, lt, retirada));
         }
         loteProdutoService.salvarAlteracoes(itens.stream().map(ItemMovimentacaoLote::getLoteProduto).toList());
         return itens;
+    }
+
+    private ItemMovimentacaoLote gerarItemMovimentacaoLote(MovimentacaoEstoque movEstoque, LoteProduto lt, int retirada) {
+        return new ItemMovimentacaoLote(lt, movEstoque, retirada);
     }
 }

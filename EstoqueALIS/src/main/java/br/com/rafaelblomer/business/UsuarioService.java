@@ -53,7 +53,6 @@ public class UsuarioService {
 
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
-        verificarUsuarioAtivo(antigo);
         validarTelefone(antigo.getId(), novo.telefone());
         atualizarDadosUsuario(antigo, novo);
         repository.save(antigo);
