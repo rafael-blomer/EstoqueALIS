@@ -47,6 +47,7 @@ public class MovimentacaoEstoqueService {
         estoqueService.verificarEstoqueAtivo(estoque);
         Produto produto = produtoService.buscarProdutoId(dto.produtoId());
         produtoService.verificarProdutoAtivo(produto);
+        estoqueService.verificarEstoqueProduto(estoque, produto);
         verificarQuantidadeTotalProduto(dto, produto);
         MovimentacaoEstoque movEstoque = new MovimentacaoEstoque();
         movEstoque.setDataHora(LocalDateTime.now());
@@ -73,6 +74,7 @@ public class MovimentacaoEstoqueService {
         produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
         estoqueService.verificarEstoqueAtivo(estoque);
         estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        estoqueService.verificarEstoqueProduto(estoque, produto);
         return repository.listarHistoricoMovimentacoesProduto(produtoId, estoqueId).stream()
                 .map(converter::movEstoqueEntityParaDto)
                 .toList();
@@ -98,6 +100,7 @@ public class MovimentacaoEstoqueService {
         produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
         estoqueService.verificarEstoqueAtivo(estoque);
         estoqueService.verificarEstoqueUsuario(estoque, usuario);
+        estoqueService.verificarEstoqueProduto(estoque, produto);
         LocalDateTime dataHoraInicio = dataInicio.atStartOfDay();
         LocalDateTime dataHoraFinal = dataFinal.atTime(23, 59, 59);
         return repository.listarHistoricoMovimentacoesProdutoEData(produtoId, estoqueId, dataHoraInicio, dataHoraFinal)

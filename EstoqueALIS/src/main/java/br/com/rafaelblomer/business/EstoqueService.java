@@ -2,6 +2,7 @@ package br.com.rafaelblomer.business;
 
 import java.util.List;
 
+import br.com.rafaelblomer.infrastructure.entities.Produto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -70,5 +71,10 @@ public class EstoqueService {
     public void verificarEstoqueUsuario(Estoque estoque, Usuario usuario) {
         if(!estoque.getUsuario().equals(usuario))
             throw new AcaoNaoPermitidaException("O usuário não tem permissão para fazer essa ação.");
+    }
+
+    public void verificarEstoqueProduto(Estoque estoque, Produto produto) {
+        if (!produto.getEstoque().equals(estoque))
+            throw new AcaoNaoPermitidaException("O produto não faz parte desse estoque.");
     }
 }

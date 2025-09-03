@@ -4,10 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.com.rafaelblomer.business.LoteProdutoService;
 import br.com.rafaelblomer.business.dtos.ItemMovimentacaoLoteResponseDTO;
 import br.com.rafaelblomer.business.dtos.MovimentacaoEstoqueResponseDTO;
-import br.com.rafaelblomer.business.dtos.MovimentacaoSaidaDTO;
 import br.com.rafaelblomer.infrastructure.entities.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

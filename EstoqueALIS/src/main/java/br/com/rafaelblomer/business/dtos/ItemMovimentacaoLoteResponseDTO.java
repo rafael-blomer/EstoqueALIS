@@ -2,7 +2,7 @@ package br.com.rafaelblomer.business.dtos;
 
 public record ItemMovimentacaoLoteResponseDTO(Long idItensMovimentacao,
                                               Long loteProdutoId,
-                                              Integer quantidadeRetiradaLote,
+                                              Integer quantidadeMexidaLote,
                                               String loteFabricante,
                                               Long produtoId,
                                               String nomeProduto,
