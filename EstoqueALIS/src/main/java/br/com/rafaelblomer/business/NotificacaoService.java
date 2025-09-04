@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 public class NotificacaoService {
-    private final String TELEGRAM_BOT_TOKEN = "8265065180:AAFNFcul5WyAa3XDsh2Q8ImbHZOxrbuUgMQ";
+    private final String TELEGRAM_BOT_TOKEN = "";
     private final String TELEGRAM_CHAT_ID = "";
 
     public void enviarAvisoLotes(List<LoteProduto> lotes, int dias) {
