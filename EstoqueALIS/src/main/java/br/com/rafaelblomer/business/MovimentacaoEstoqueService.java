@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import br.com.rafaelblomer.business.converters.MovimentacaoEstoqueConverter;
 import br.com.rafaelblomer.business.dtos.MovimentacaoEstoqueResponseDTO;
 import br.com.rafaelblomer.infrastructure.repositories.MovimentacaoEstoqueRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MovimentacaoEstoqueService {
@@ -42,6 +43,7 @@ public class MovimentacaoEstoqueService {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Transactional
     public MovimentacaoEstoqueResponseDTO registrarSaida(MovimentacaoSaidaDTO dto) {
         Estoque estoque = estoqueService.buscarEstoqueEntityId(dto.estoqueId());
         estoqueService.verificarEstoqueAtivo(estoque);
@@ -59,6 +61,7 @@ public class MovimentacaoEstoqueService {
         return converter.movEstoqueEntityParaDto(movEstoque);
     }
 
+    @Transactional(readOnly = true)
     public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesEstoque(String token, Long estoqueId) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
@@ -67,6 +70,7 @@ public class MovimentacaoEstoqueService {
         return repository.findByEstoqueId(estoque.getId()).stream().map(converter::movEstoqueEntityParaDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesProduto(String token, Long estoqueId, Long produtoId) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
@@ -80,6 +84,7 @@ public class MovimentacaoEstoqueService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesData(String token, Long estoqueId, LocalDate dataInicio, LocalDate dataFinal) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);
@@ -93,6 +98,7 @@ public class MovimentacaoEstoqueService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MovimentacaoEstoqueResponseDTO> listarHistoricoMovimentacoesProdutoEData(String token, Long estoqueId, Long produtoId, LocalDate dataInicio, LocalDate dataFinal) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = estoqueService.buscarEstoqueEntityId(estoqueId);

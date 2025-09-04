@@ -16,6 +16,7 @@ import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.ProdutoRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProdutoService {
@@ -32,6 +33,7 @@ public class ProdutoService {
     @Autowired
     private EstoqueService estoqueService;
 
+    @Transactional
     public ProdutoResponseDTO criarProduto(ProdutoCadastroDTO dto, String token) {
         Usuario usuario = usuarioService.findByToken(token);
         Produto produto = converter.cadastroParaProdutoEntity(dto);
@@ -43,6 +45,7 @@ public class ProdutoService {
         return converter.entityParaResponseDTO(produto, estoque);
     }
 
+    @Transactional
     public ProdutoResponseDTO atualizarProduto(Long idProduto, ProdutoAtualizacaoDTO dto, String token) {
         Produto antigo = buscarProdutoId(idProduto);
         verificarProdutoAtivo(antigo);
@@ -53,6 +56,7 @@ public class ProdutoService {
         return converter.entityParaResponseDTO(repository.save(antigo), antigo.getEstoque());
     }
 
+    @Transactional(readOnly = true)
     public ProdutoResponseDTO buscarProdutoPorId(Long id, String token) {
         Produto produto = buscarProdutoId(id);
         Usuario usuario = usuarioService.findByToken(token);
@@ -60,6 +64,7 @@ public class ProdutoService {
         return converter.entityParaResponseDTO(produto, produto.getEstoque());
     }
 
+    @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> buscarTodosProdutosUsuario(String token) {
         Usuario usuario = usuarioService.findByToken(token);
         return repository.findByEstoqueUsuarioId(usuario.getId())
@@ -70,6 +75,7 @@ public class ProdutoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ProdutoResponseDTO> buscarTodosProdutosEstoque(Long estoqueId, String token) {
         Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoEstoqueUsuario(estoqueId, usuario);
@@ -80,6 +86,7 @@ public class ProdutoService {
                 .toList();
     }
 
+    @Transactional
     public void desativarProduto(Long id, String token) {
         Usuario usuario = usuarioService.findByToken(token);
         Produto produto = buscarProdutoId(id);

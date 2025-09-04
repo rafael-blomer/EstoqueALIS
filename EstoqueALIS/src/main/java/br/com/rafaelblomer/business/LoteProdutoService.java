@@ -17,6 +17,7 @@ import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.LoteProdutoRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LoteProdutoService {
@@ -36,6 +37,7 @@ public class LoteProdutoService {
     @Autowired
     private LoteProdutoConverter converter;
 
+    @Transactional
     public LoteProdutoResponseDTO cadastrarLote(LoteProdutoCadastroDTO dto) {
         validarDto(dto);
         Produto produto = produtoService.buscarProdutoId(dto.produtoId());
@@ -46,6 +48,7 @@ public class LoteProdutoService {
         return converter.paraLoteProdutoDTO(loteProduto);
     }
 
+    @Transactional(readOnly = true)
     public List<LoteProdutoResponseDTO> buscarLotesPorProduto(Long produtoId, String token) {
         Usuario usuario = usuarioService.findByToken(token);
         Produto produto = produtoService.buscarProdutoId(produtoId);

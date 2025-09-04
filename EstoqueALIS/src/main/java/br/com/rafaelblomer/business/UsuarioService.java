@@ -20,6 +20,7 @@ import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
 import br.com.rafaelblomer.infrastructure.security.JwtUtil;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UsuarioService {
@@ -39,18 +40,16 @@ public class UsuarioService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-
+    @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioCadastroDTO entityCadastro) {
         Usuario entity = converter.dtoCadastroParaEntity(entityCadastro);
         entity.setSenha(encoder.encode(entity.getSenha()));
         return converter.entityParaResponseDTO(repository.save(entity));
     }
 
-    public UsuarioResponseDTO buscarUsuarioDTOToken(String token) {
-        Usuario usuario = findByToken(token);
-        return converter.entityParaResponseDTO(usuario);
-    }
 
+
+    @Transactional
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
         validarTelefone(antigo.getId(), novo.telefone());
@@ -59,12 +58,14 @@ public class UsuarioService {
         return converter.entityParaResponseDTO(antigo);
     }
 
+    @Transactional
     public void alterarStatusAtivoUsuario(String token) {
         Usuario entity = findByToken(token);
         entity.setAtivo(false);
         repository.save(entity);
     }
 
+    @Transactional
     public String realizarLogin(UsuarioLoginDTO dto) {
         Usuario usuario = repository.findByEmail(dto.email()).orElseThrow(() -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
         verificarUsuarioAtivo(usuario);
@@ -75,6 +76,11 @@ public class UsuarioService {
     }
 
     //ÚTEIS
+
+    public UsuarioResponseDTO buscarUsuarioDTOToken(String token) {
+        Usuario usuario = findByToken(token);
+        return converter.entityParaResponseDTO(usuario);
+    }
 
     public Usuario findByToken(String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7));

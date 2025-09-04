@@ -14,6 +14,7 @@ import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.EstoqueRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EstoqueService {
@@ -27,12 +28,14 @@ public class EstoqueService {
     @Autowired
     private UsuarioService usuarioService;
 
+    @Transactional
     public EstoqueResponseDTO criarNovoEstoque(String token) {
         Estoque estoque = new Estoque(usuarioService.findByToken(token));
         repository.save(estoque);
         return converter.entityParaResponseDTO(estoque);
     }
 
+    @Transactional(readOnly = true)
     public List<EstoqueResponseDTO> buscarTodosEstoquesUsuario(String token) {
         Usuario usuario = usuarioService.findByToken(token);
         return repository.findByUsuario(usuario)
@@ -42,6 +45,7 @@ public class EstoqueService {
                 .toList();
     }
 
+    @Transactional
     public void desativarEstoque(String token, Long id) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = buscarEstoqueEntityId(id);
@@ -50,6 +54,7 @@ public class EstoqueService {
         repository.save(estoque);
     }
 
+    @Transactional(readOnly = true)
     public EstoqueResponseDTO buscarUmEstoque(String token, Long id) {
         Usuario usuario = usuarioService.findByToken(token);
         Estoque estoque = buscarEstoqueEntityId(id);
