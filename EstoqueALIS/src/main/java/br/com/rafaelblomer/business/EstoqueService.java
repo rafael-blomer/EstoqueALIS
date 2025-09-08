@@ -2,6 +2,7 @@ package br.com.rafaelblomer.business;
 
 import java.util.List;
 
+import br.com.rafaelblomer.business.dtos.EstoqueCadastroDTO;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,8 +30,8 @@ public class EstoqueService {
     private UsuarioService usuarioService;
 
     @Transactional
-    public EstoqueResponseDTO criarNovoEstoque(String token) {
-        Estoque estoque = new Estoque(usuarioService.findByToken(token));
+    public EstoqueResponseDTO criarNovoEstoque(String token, EstoqueCadastroDTO cadastro) {
+        Estoque estoque = new Estoque(cadastro.nomeEstoque(), usuarioService.findByToken(token));
         repository.save(estoque);
         return converter.entityParaResponseDTO(estoque);
     }

@@ -26,6 +26,7 @@ public class NotificacaoService {
             String quantidadeFormatado = escaparMarkdownV2(lote.getQuantidadeLote().toString());
             String marcaProdutoFormatado = escaparMarkdownV2(lote.getProduto().getMarca());
             String estoqueProdutoFormatado = escaparMarkdownV2(lote.getProduto().getEstoque().getId().toString());
+            String estoqueNomeFormatado = escaparMarkdownV2(lote.getProduto().getEstoque().getNomeEstoque());
             String dataValidadeFormatada = escaparMarkdownV2(lote.getDataValidade().toString());
 
             mensagem.append("Produto: *")
@@ -36,6 +37,9 @@ public class NotificacaoService {
                     .append("*\n")
                     .append("ID Estoque: *")
                     .append(estoqueProdutoFormatado)
+                    .append("*\n")
+                    .append("Nome Estoque: *")
+                    .append(estoqueNomeFormatado)
                     .append("*\n")
                     .append("Quantidade: *")
                     .append(quantidadeFormatado)

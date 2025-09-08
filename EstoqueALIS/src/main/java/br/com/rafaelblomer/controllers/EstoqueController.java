@@ -1,6 +1,7 @@
 package br.com.rafaelblomer.controllers;
 
 import br.com.rafaelblomer.business.EstoqueService;
+import br.com.rafaelblomer.business.dtos.EstoqueCadastroDTO;
 import br.com.rafaelblomer.business.dtos.EstoqueResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,8 @@ public class EstoqueController {
     private EstoqueService service;
 
     @PostMapping
-    public ResponseEntity<EstoqueResponseDTO> criarNovoEstoque(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok().body(service.criarNovoEstoque(token));
+    public ResponseEntity<EstoqueResponseDTO> criarNovoEstoque(@RequestHeader("Authorization") String token, @RequestBody EstoqueCadastroDTO cadastro) {
+        return ResponseEntity.ok().body(service.criarNovoEstoque(token, cadastro));
     }
 
     @GetMapping("/todos")

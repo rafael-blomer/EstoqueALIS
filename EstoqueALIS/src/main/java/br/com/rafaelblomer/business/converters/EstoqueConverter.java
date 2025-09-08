@@ -11,6 +11,7 @@ public class EstoqueConverter {
     public EstoqueResponseDTO entityParaResponseDTO (Estoque estoque) {
         return new EstoqueResponseDTO(
                 estoque.getId(),
+                estoque.getNomeEstoque(),
                 estoque.getUsuario().getId());
     }
 
