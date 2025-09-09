@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,26 @@
             justify-content: space-between;
             align-items: center;
             padding: 15px 20px;
+        }
+
+        header .right-section {
+            display: flex;
+            align-items: center;
+        }
+
+        #btn-logout {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        #btn-logout:hover {
+            background-color: #d32f2f;
         }
 
         .dropdown {
@@ -40,7 +61,7 @@
             left: 0;
             background-color: #fff;
             min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
             z-index: 1;
             border-radius: 5px;
         }
@@ -60,8 +81,32 @@
             display: block;
         }
 
-        #estoques {
+        main {
             margin: 20px;
+        }
+
+        .title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #btnCriarEstoque {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #btnCriarEstoque:hover {
+            background-color: #45a049;
+        }
+
+        #estoques {
             padding: 0;
             list-style: none;
         }
@@ -72,7 +117,7 @@
             padding: 15px;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease;
         }
 
@@ -81,25 +126,31 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <div class="dropdown">
             <button>Menu</button>
             <div class="dropdown-content">
                 <a href="atualizar.html">Alterar dados</a>
-                <a href="#">Desativar usuário</a>
+                <a href="">Produtos por usuário</a>
             </div>
         </div>
-        <h3 id="bemVindo"></h3>
+        <div class="right-section">
+            <h3 id="bemVindo"></h3>
+            <button id="btn-logout">Sair</button>
+        </div>
     </header>
 
     <main>
-        <h2 style="margin:20px;">Meus Estoques</h2>
+        <div class="title-row">
+            <h2>Meus Estoques</h2>
+            <button id="btnCriarEstoque">+ Criar Estoque</button>
+        </div>
         <ul id="estoques"></ul>
     </main>
 
     <script>
-        // pegar token do localStorage
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -107,37 +158,74 @@
             window.location.href = "login.html";
         }
 
-        // buscar dados do usuário logado
-        fetch("http://localhost:8080/usuario", {
-            method: "GET",
-            headers: {
-                "Authorization": localStorage.getItem("token")
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Erro ao buscar usuário");
-            }
-            return response.json();
-        })
-        .then(usuario => {
-            document.getElementById("bemVindo").innerText = `Bem vindo, ${usuario.nome}`;
+        function carregarUsuario() {
+            fetch("http://localhost:8080/usuario", {
+                method: "GET",
+                headers: {
+                    "Authorization": token
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erro ao buscar usuário");
+                    }
+                    return response.json();
+                })
+                .then(usuario => {
+                    document.getElementById("bemVindo").innerText = `Bem vindo, ${usuario.nome}`;
+                    const lista = document.getElementById("estoques");
+                    lista.innerHTML = "";
+                    usuario.estoques.forEach(estoque => {
+                        const li = document.createElement("li");
+                        li.innerText = estoque.nomeEstoque;
+                        li.onclick = () => {
+                            window.location.href = `estoque.html?id=${estoque.id}`;
+                        };
+                        lista.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Erro ao carregar dados do usuário.");
+                });
+        }
 
-            const lista = document.getElementById("estoques");
-            usuario.estoques.forEach(estoque => {
-                const li = document.createElement("li");
-                li.innerText = estoque.nome; // supondo que EstoqueResponseDTO tenha "nome"
-                li.onclick = () => {
-                    // redirecionar para a página de detalhes do estoque
-                    window.location.href = `estoque.html?id=${estoque.id}`;
-                };
-                lista.appendChild(li);
-            });
-        })
-        .catch(error => {
-            console.error(error);
-            alert("Erro ao carregar dados do usuário.");
-        });
+        carregarUsuario();
+
+        document.getElementById("btnCriarEstoque").onclick = () => {
+            const nome = prompt("Digite o nome do novo estoque:");
+            if (nome && nome.trim() !== "") {
+                fetch("http://localhost:8080/estoques", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": token
+                    },
+                    body: JSON.stringify({
+                        nomeEstoque: nome.trim()
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Erro ao criar estoque");
+                        }
+                        return response.json();
+                    })
+                    .then(() => {
+                        carregarUsuario();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Erro ao criar estoque.");
+                    });
+            }
+        };
+
+        document.getElementById("btn-logout").onclick = () => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        };
     </script>
 </body>
+
 </html>

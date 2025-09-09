@@ -1,4 +1,6 @@
 package br.com.rafaelblomer.business.dtos;
 
-public record EstoqueCadastroDTO(String nomeEstoque) {
+import jakarta.validation.constraints.NotBlank;
+
+public record EstoqueCadastroDTO(@NotBlank String nomeEstoque) {
 }

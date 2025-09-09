@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atualizar Usuário</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            background-color: #f2f2f2; 
+            font-family: Arial, sans-serif;
+        }
+
+        #formAtualizar {
+            border: 2px solid black;
+            border-radius: 10px; 
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        div {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #btnSalvar {
+            background-color: #4CAF50;
+        }
+
+        #btnSalvar:hover {
+            background-color: #45a049;
+        }
+
+        #btnDesativar {
+            background-color: #d9534f;
+        }
+
+        #btnDesativar:hover {
+            background-color: #c9302c;
+        }
+
+        #btnVoltar {
+            background-color: #0275d8;
+        }
+
+        #btnVoltar:hover {
+            background-color: #025aa5;
+        }
+    </style>
+</head>
+<body>
+    <form id="formAtualizar">
+        <h1>Atualizar Dados</h1>
+        <div>
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" placeholder="Novo nome (opcional)">
+        </div>
+        <div>
+            <label for="telefone">Telefone</label>
+            <input type="text" id="telefone" placeholder="Ex: 11987654321 (opcional)">
+        </div>
+        <div>
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Nova senha (opcional)">
+        </div>
+        <button type="submit" id="btnSalvar">Salvar Alterações</button>
+        <button type="button" id="btnDesativar">Desativar Usuário</button>
+        <button type="button" id="btnVoltar">Voltar para Página Principal</button>
+    </form>
+
+    <script>
+        const form = document.getElementById("formAtualizar");
+
+        // --- SALVAR ALTERAÇÕES ---
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById("nome").value.trim();
+            const telefone = document.getElementById("telefone").value.trim();
+            const senha = document.getElementById("senha").value.trim();
+
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Você precisa estar logado!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const dadosAtualizacao = {};
+            if (nome) dadosAtualizacao.nome = nome;
+            if (telefone) dadosAtualizacao.telefone = telefone;
+            if (senha) dadosAtualizacao.senha = senha;
+
+            if (Object.keys(dadosAtualizacao).length === 0) {
+                alert("Preencha pelo menos um campo para atualizar.");
+                return;
+            }
+
+            fetch("http://localhost:8080/usuario/atualizar", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                },
+                body: JSON.stringify(dadosAtualizacao)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Erro ao atualizar usuário");
+                return response.json();
+            })
+            .then(data => {
+                alert("Dados atualizados com sucesso!");
+                window.location.href = "home.html";
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                alert("Falha ao atualizar os dados.");
+            });
+        });
+
+        // --- DESATIVAR USUÁRIO ---
+        document.getElementById("btnDesativar").addEventListener("click", function() {
+            const token = localStorage.getItem("token");
+
+            if (!confirm("Tem certeza que deseja desativar sua conta?")) {
+                return;
+            }
+
+            fetch("http://localhost:8080/usuario/desativar", {
+                method: "PATCH",
+                headers: {
+                    "Authorization": token
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Erro ao desativar usuário");
+                alert("Usuário desativado com sucesso!");
+                localStorage.removeItem("token");
+                window.location.href = "login.html";
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                alert("Falha ao desativar usuário.");
+            });
+        });
+
+        // --- VOLTAR PARA HOME ---
+        document.getElementById("btnVoltar").addEventListener("click", function() {
+            window.location.href = "home.html";
+        });
+    </script>
+</body>
+</html>
