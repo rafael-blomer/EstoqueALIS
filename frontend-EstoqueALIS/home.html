@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown button {
+            background-color: #444;
+            color: #fff;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            left: 0;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        #estoques {
+            margin: 20px;
+            padding: 0;
+            list-style: none;
+        }
+
+        #estoques li {
+            background: #fff;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        #estoques li:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="dropdown">
+            <button>Menu</button>
+            <div class="dropdown-content">
+                <a href="atualizar.html">Alterar dados</a>
+                <a href="#">Desativar usuário</a>
+            </div>
+        </div>
+        <h3 id="bemVindo"></h3>
+    </header>
+
+    <main>
+        <h2 style="margin:20px;">Meus Estoques</h2>
+        <ul id="estoques"></ul>
+    </main>
+
+    <script>
+        // pegar token do localStorage
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            alert("Você precisa estar logado!");
+            window.location.href = "login.html";
+        }
+
+        // buscar dados do usuário logado
+        fetch("http://localhost:8080/usuario", {
+            method: "GET",
+            headers: {
+                "Authorization": localStorage.getItem("token")
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Erro ao buscar usuário");
+            }
+            return response.json();
+        })
+        .then(usuario => {
+            document.getElementById("bemVindo").innerText = `Bem vindo, ${usuario.nome}`;
+
+            const lista = document.getElementById("estoques");
+            usuario.estoques.forEach(estoque => {
+                const li = document.createElement("li");
+                li.innerText = estoque.nome; // supondo que EstoqueResponseDTO tenha "nome"
+                li.onclick = () => {
+                    // redirecionar para a página de detalhes do estoque
+                    window.location.href = `estoque.html?id=${estoque.id}`;
+                };
+                lista.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error(error);
+            alert("Erro ao carregar dados do usuário.");
+        });
+    </script>
+</body>
+</html>

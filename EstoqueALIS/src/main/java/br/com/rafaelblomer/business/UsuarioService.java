@@ -47,8 +47,6 @@ public class UsuarioService {
         return converter.entityParaResponseDTO(repository.save(entity));
     }
 
-
-
     @Transactional
     public UsuarioResponseDTO atualizarUsuario(String token, UsuarioAtualizacaoDTO novo) {
         Usuario antigo = findByToken(token);
@@ -75,12 +73,12 @@ public class UsuarioService {
         return "Bearer " + jwtToken;
     }
 
-    //ÚTEIS
-
     public UsuarioResponseDTO buscarUsuarioDTOToken(String token) {
         Usuario usuario = findByToken(token);
         return converter.entityParaResponseDTO(usuario);
     }
+
+    //ÚTEIS
 
     public Usuario findByToken(String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7));

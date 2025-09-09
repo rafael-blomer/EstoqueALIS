@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center; 
+            align-items: center; 
+            background-color: #f2f2f2; 
+        }
+
+        #form1 {
+            border: 2px solid black;
+            border-radius: 10px; 
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        div {
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <form id="formLogin">
+        <h1>Login</h1>
+        <div>
+            <label for="email">Insira seu email: </label> 
+            <input type="text" id="email">
+        </div>
+        <div>
+            <label for="senha">Insira sua senha: </label>
+            <input type="password" id="senha">
+        </div>
+        <button type="submit">Entrar</button>
+        <div>
+            <label for="cadastro">Não possui cadastro?</label>
+            <a href="/cadastro.html"><button type="button">Cadastrar</button></a>
+        </div>
+    </form>
+    <script>
+       
+       const form = document.getElementById("formLogin");
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); 
+
+            const email = document.getElementById("email").value;
+            const senha = document.getElementById("senha").value;
+
+            fetch("http://localhost:8080/usuario/login", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    senha: senha
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro na requisição");
+                }
+                return response.text();
+            })
+            .then(data => {
+                localStorage.setItem("token", token);
+                alert("Login realizado com sucesso!");
+                window.location.href = "home.html";
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                alert("Falha ao realizar login.");
+            });
+        });
+    </script>
+</body>
+</html>
