@@ -26,19 +26,42 @@
             align-items: center;
         }
 
-        #btn-logout {
-            background-color: #f44336;
-            color: white;
+        #btn-logout,
+        #btn-voltar,
+        #btn-criar {
             padding: 8px 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-left: 15px;
+            margin-left: 10px;
             font-size: 14px;
+        }
+
+        #btn-logout {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #btn-voltar {
+            background-color: #444;
+            color: white;
+        }
+
+        #btn-criar {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #btn-voltar:hover {
+            background-color: #555;
         }
 
         #btn-logout:hover {
             background-color: #d32f2f;
+        }
+
+        #btn-criar:hover {
+            background-color: #45a049;
         }
 
         main {
@@ -66,6 +89,38 @@
             background-color: #333;
             color: white;
         }
+
+        /* seção do formulário */
+        #form-criar {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #form-criar input,
+        #form-criar textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #form-criar button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #form-criar button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
@@ -74,12 +129,25 @@
         <h2>Produtos</h2>
         <div class="right-section">
             <button id="btn-voltar">⬅ Voltar</button>
+            <button id="btn-criar" style="display:none;">+ Criar Produto</button>
             <button id="btn-logout">Sair</button>
         </div>
     </header>
 
     <main>
         <h3 id="titulo"></h3>
+
+        <!-- formulário de criação -->
+        <div id="form-criar">
+            <h3>Novo Produto</h3>
+            <form id="produtoForm">
+                <input type="text" id="nome" placeholder="Nome" maxlength="40" required>
+                <input type="text" id="marca" placeholder="Marca" maxlength="40" required>
+                <textarea id="descricao" placeholder="Descrição" maxlength="100" required></textarea>
+                <button type="submit">Salvar Produto</button>
+            </form>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -103,13 +171,14 @@
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        const estoqueId = urlParams.get("estoqueId"); // agora o parâmetro é estoqueId
+        const estoqueId = urlParams.get("estoqueId");
 
         function carregarProdutos() {
             let url = "http://localhost:8080/produto";
             if (estoqueId) {
                 url = `http://localhost:8080/produto/estoque/${estoqueId}`;
                 document.getElementById("titulo").innerText = "Produtos do Estoque";
+                document.getElementById("btn-criar").style.display = "inline-block";
             } else {
                 document.getElementById("titulo").innerText = "Todos os Produtos do Usuário";
             }
@@ -129,6 +198,11 @@
                     lista.innerHTML = "";
                     produtos.forEach(p => {
                         const tr = document.createElement("tr");
+                        tr.style.cursor = "pointer";
+                        tr.onclick = () => {
+                            window.location.href = `produto.html?id=${p.id}`;
+                        };
+
                         tr.innerHTML = `
                         <td>${p.id}</td>
                         <td>${p.nome}</td>
@@ -136,7 +210,7 @@
                         <td>${p.descricao}</td>
                         <td>${p.quantidadeTotal}</td>
                         <td>${p.estoque.nomeEstoque}</td>
-                    `;
+                        `;
                         lista.appendChild(tr);
                     });
                 })
@@ -148,13 +222,56 @@
 
         carregarProdutos();
 
+        // logout
         document.getElementById("btn-logout").onclick = () => {
             localStorage.removeItem("token");
             window.location.href = "login.html";
         };
 
+        // voltar
         document.getElementById("btn-voltar").onclick = () => {
             window.location.href = "home.html";
+        };
+
+        // abrir/fechar formulário
+        document.getElementById("btn-criar").onclick = () => {
+            const formDiv = document.getElementById("form-criar");
+            formDiv.style.display = formDiv.style.display === "block" ? "none" : "block";
+        };
+
+        // submit do formulário
+        document.getElementById("produtoForm").onsubmit = (e) => {
+            e.preventDefault();
+
+            const produto = {
+                nome: document.getElementById("nome").value,
+                marca: document.getElementById("marca").value,
+                descricao: document.getElementById("descricao").value,
+                idEstoque: parseInt(estoqueId)
+            };
+
+            fetch("http://localhost:8080/produto", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token
+                },
+                body: JSON.stringify(produto)
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao criar produto");
+                    return response.json();
+                })
+                .then(() => {
+                    alert("Produto criado com sucesso!");
+                    document.getElementById("produtoForm").reset();
+                    document.getElementById("form-criar").style.display = "none";
+                    carregarProdutos();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Erro ao criar produto.");
+                });
         };
     </script>
 
