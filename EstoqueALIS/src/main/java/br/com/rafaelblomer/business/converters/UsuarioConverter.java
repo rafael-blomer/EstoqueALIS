@@ -3,6 +3,7 @@ package br.com.rafaelblomer.business.converters;
 import br.com.rafaelblomer.business.dtos.EstoqueResponseDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
+import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ public class UsuarioConverter {
     public UsuarioResponseDTO entityParaResponseDTO(Usuario entity) {
         List<EstoqueResponseDTO> list = entity.getEstoques()
                 .stream()
+                .filter(Estoque::getAtivo)
                 .map(e -> estoqueConverter.entityParaResponseDTO(e))
                 .toList();
 

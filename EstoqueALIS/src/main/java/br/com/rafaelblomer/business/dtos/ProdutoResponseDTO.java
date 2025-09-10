@@ -5,5 +5,5 @@ public record ProdutoResponseDTO(Long id,
                                  String marca,
                                  String descricao,
                                  Integer quantidadeTotal,
-                                 EstoqueResponseDTO Estoque) {
+                                 EstoqueResponseDTO estoque) {
 }

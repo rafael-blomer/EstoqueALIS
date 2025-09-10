@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        header .right-section {
+            display: flex;
+            align-items: center;
+        }
+
+        #btn-logout {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 14px;
+        }
+
+        #btn-logout:hover {
+            background-color: #d32f2f;
+        }
+
+        main {
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #333;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h2>Produtos</h2>
+        <div class="right-section">
+            <button id="btn-voltar">⬅ Voltar</button>
+            <button id="btn-logout">Sair</button>
+        </div>
+    </header>
+
+    <main>
+        <h3 id="titulo"></h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Marca</th>
+                    <th>Descrição</th>
+                    <th>Quantidade</th>
+                    <th>Estoque</th>
+                </tr>
+            </thead>
+            <tbody id="listaProdutos"></tbody>
+        </table>
+    </main>
+
+    <script>
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Você precisa estar logado!");
+            window.location.href = "login.html";
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const estoqueId = urlParams.get("estoqueId"); // agora o parâmetro é estoqueId
+
+        function carregarProdutos() {
+            let url = "http://localhost:8080/produto";
+            if (estoqueId) {
+                url = `http://localhost:8080/produto/estoque/${estoqueId}`;
+                document.getElementById("titulo").innerText = "Produtos do Estoque";
+            } else {
+                document.getElementById("titulo").innerText = "Todos os Produtos do Usuário";
+            }
+
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Authorization": token
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao buscar produtos");
+                    return response.json();
+                })
+                .then(produtos => {
+                    const lista = document.getElementById("listaProdutos");
+                    lista.innerHTML = "";
+                    produtos.forEach(p => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                        <td>${p.id}</td>
+                        <td>${p.nome}</td>
+                        <td>${p.marca}</td>
+                        <td>${p.descricao}</td>
+                        <td>${p.quantidadeTotal}</td>
+                        <td>${p.estoque.nomeEstoque}</td>
+                    `;
+                        lista.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Erro ao carregar produtos.");
+                });
+        }
+
+        carregarProdutos();
+
+        document.getElementById("btn-logout").onclick = () => {
+            localStorage.removeItem("token");
+            window.location.href = "login.html";
+        };
+
+        document.getElementById("btn-voltar").onclick = () => {
+            window.location.href = "home.html";
+        };
+    </script>
+
+</body>
+
+</html>
