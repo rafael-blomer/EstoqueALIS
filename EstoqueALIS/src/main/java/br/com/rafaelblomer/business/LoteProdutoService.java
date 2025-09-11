@@ -48,14 +48,6 @@ public class LoteProdutoService {
         return converter.paraLoteProdutoDTO(loteProduto);
     }
 
-    @Transactional(readOnly = true)
-    public List<LoteProdutoResponseDTO> buscarLotesPorProduto(Long produtoId, String token) {
-        Usuario usuario = usuarioService.findByToken(token);
-        Produto produto = produtoService.buscarProdutoId(produtoId);
-        produtoService.verificarPermissaoProdutoUsuario(usuario, produto);
-        return repository.findByProdutoId(produtoId).stream().map(lp -> converter.paraLoteProdutoDTO(lp)).toList();
-    }
-
     //ÚTEIS
 
     private void validarDto(LoteProdutoCadastroDTO dto) {
@@ -63,10 +55,6 @@ public class LoteProdutoService {
             throw new DadoIrregularException("A quantidade total do lote tem que ser maior que 0.");
         if (dto.dataValidade().isBefore(LocalDate.now()))
             throw new DadoIrregularException("A data de validade tem que ser após a data atual");
-    }
-
-    public LoteProduto buscarLoteProdutoEntity(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ObjetoNaoEncontradoException("Lote de produot não encontrado."));
     }
 
     public List<LoteProduto> buscarLoteProdutoPorDataValidade(Long produtoId) {

@@ -21,9 +21,4 @@ public class LoteProdutoController {
     public ResponseEntity<LoteProdutoResponseDTO> criarLoteProduto(@RequestBody @Valid LoteProdutoCadastroDTO dto) {
         return ResponseEntity.ok().body(service.cadastrarLote(dto));
     }
-
-    @GetMapping("/{produtoId}")
-    public ResponseEntity<List<LoteProdutoResponseDTO>> buscarLotesPorProduto(@RequestHeader("Authorization") String token, @PathVariable Long produtoId) {
-        return ResponseEntity.ok().body(service.buscarLotesPorProduto(produtoId, token));
-    }
 }
