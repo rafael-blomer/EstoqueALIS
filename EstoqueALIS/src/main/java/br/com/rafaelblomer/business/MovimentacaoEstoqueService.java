@@ -92,6 +92,7 @@ public class MovimentacaoEstoqueService {
         estoqueService.verificarEstoqueUsuario(estoque, usuario);
         LocalDateTime dataHoraInicio = dataInicio.atStartOfDay();
         LocalDateTime dataHoraFinal = dataFinal.atTime(23, 59, 59);
+        verificarDatas(dataHoraInicio, dataHoraFinal);
         return  repository.findByEstoqueIdAndDataHoraBetween(estoqueId, dataHoraInicio, dataHoraFinal)
                 .stream()
                 .map(converter::movEstoqueEntityParaDto)
@@ -109,6 +110,7 @@ public class MovimentacaoEstoqueService {
         estoqueService.verificarEstoqueProduto(estoque, produto);
         LocalDateTime dataHoraInicio = dataInicio.atStartOfDay();
         LocalDateTime dataHoraFinal = dataFinal.atTime(23, 59, 59);
+        verificarDatas(dataHoraInicio, dataHoraFinal);
         return repository.listarHistoricoMovimentacoesProdutoEData(produtoId, estoqueId, dataHoraInicio, dataHoraFinal)
                 .stream()
                 .map(converter::movEstoqueEntityParaDto)
@@ -151,5 +153,10 @@ public class MovimentacaoEstoqueService {
 
     private ItemMovimentacaoLote gerarItemMovimentacaoLote(MovimentacaoEstoque movEstoque, LoteProduto lt, int retirada) {
         return new ItemMovimentacaoLote(lt, movEstoque, retirada);
+    }
+
+    private void verificarDatas(LocalDateTime dataHoraInicio, LocalDateTime dataHoraFinal) {
+        if(dataHoraInicio.isAfter(dataHoraFinal))
+            throw new DadoIrregularException("A data de inicío deve ser anterior a data final.");
     }
 }

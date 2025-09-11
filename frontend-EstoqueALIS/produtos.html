@@ -26,9 +26,20 @@
             align-items: center;
         }
 
+        #btn-criar {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #btn-movimentacoes {
+            background-color: #2196F3;
+            color: white;
+        }
+
         #btn-logout,
         #btn-voltar,
-        #btn-criar {
+        #btn-criar,
+        #btn-movimentacoes {
             padding: 8px 12px;
             border: none;
             border-radius: 5px;
@@ -47,11 +58,6 @@
             color: white;
         }
 
-        #btn-criar {
-            background-color: #4CAF50;
-            color: white;
-        }
-
         #btn-voltar:hover {
             background-color: #555;
         }
@@ -62,6 +68,10 @@
 
         #btn-criar:hover {
             background-color: #45a049;
+        }
+
+        #btn-movimentacoes:hover {
+            background-color: #1976D2;
         }
 
         main {
@@ -91,7 +101,8 @@
         }
 
         /* seção do formulário */
-        #form-criar {
+        #form-criar,
+        #movimentacoes-section {
             display: none;
             margin-top: 20px;
             padding: 15px;
@@ -101,7 +112,8 @@
         }
 
         #form-criar input,
-        #form-criar textarea {
+        #form-criar textarea,
+        #filtro-movimentacoes input {
             width: 100%;
             padding: 8px;
             margin: 8px 0;
@@ -109,7 +121,8 @@
             border-radius: 5px;
         }
 
-        #form-criar button {
+        #form-criar button,
+        #filtro-movimentacoes button {
             background-color: #4CAF50;
             color: white;
             padding: 10px 14px;
@@ -118,8 +131,17 @@
             cursor: pointer;
         }
 
-        #form-criar button:hover {
+        #form-criar button:hover,
+        #filtro-movimentacoes button:hover {
             background-color: #45a049;
+        }
+
+        #movimentacoes-table {
+            margin-top: 15px;
+        }
+
+        #filtro-movimentacoes input[type="date"] {
+            width: 575px;
         }
     </style>
 </head>
@@ -130,6 +152,7 @@
         <div class="right-section">
             <button id="btn-voltar">⬅ Voltar</button>
             <button id="btn-criar" style="display:none;">+ Criar Produto</button>
+            <button id="btn-movimentacoes" style="display:none;">📊 Movimentações</button>
             <button id="btn-logout">Sair</button>
         </div>
     </header>
@@ -148,6 +171,36 @@
             </form>
         </div>
 
+        <!-- seção de movimentações -->
+        <div id="movimentacoes-section">
+            <h3>Movimentações do Estoque</h3>
+
+            <!-- filtro por data -->
+            <div id="filtro-movimentacoes">
+                <label>Data Início:</label>
+                <input type="date" id="dataInicio">
+                <label>Data Final:</label>
+                <input type="date" id="dataFinal">
+                <button id="btn-filtrar">Filtrar</button>
+            </div>
+
+            <table id="movimentacoes-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Data/Hora</th>
+                        <th>Produto</th>
+                        <th>Marca</th>
+                        <th>Lote</th>
+                        <th>Quantidade</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody id="listaMovimentacoes"></tbody>
+            </table>
+        </div>
+
+        <!-- tabela de produtos -->
         <table>
             <thead>
                 <tr>
@@ -179,6 +232,7 @@
                 url = `http://localhost:8080/produto/estoque/${estoqueId}`;
                 document.getElementById("titulo").innerText = "Produtos do Estoque";
                 document.getElementById("btn-criar").style.display = "inline-block";
+                document.getElementById("btn-movimentacoes").style.display = "inline-block";
             } else {
                 document.getElementById("titulo").innerText = "Todos os Produtos do Usuário";
             }
@@ -210,13 +264,64 @@
                         <td>${p.descricao}</td>
                         <td>${p.quantidadeTotal}</td>
                         <td>${p.estoque.nomeEstoque}</td>
-                        `;
+                    `;
                         lista.appendChild(tr);
                     });
                 })
                 .catch(error => {
                     console.error(error);
                     alert("Erro ao carregar produtos.");
+                });
+        }
+
+        function renderizarMovimentacoes(movs) {
+            movs.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+            movs = movs.slice(0, 70); // limitar às últimas 70 movimentações
+
+            const lista = document.getElementById("listaMovimentacoes");
+            lista.innerHTML = "";
+
+            movs.forEach(m => {
+                m.itensMovimentacoesLote.forEach(i => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                    <td>${m.id}</td>
+                    <td>${new Date(m.dataHora).toLocaleString()}</td>
+                    <td>${i.nomeProduto}</td>
+                    <td>${i.marcaProduto}</td>
+                    <td>${i.loteFabricante}</td>
+                    <td>${i.quantidadeMexidaLote}</td>
+                    <td>${m.tipoMovimentacao}</td>
+                `;
+                    lista.appendChild(tr);
+                });
+            });
+        }
+
+        function carregarMovimentacoes(dataInicio, dataFinal) {
+            let url = "";
+            if (dataInicio && dataFinal) {
+                url = `http://localhost:8080/movimentacoes/data?estoqueId=${estoqueId}&dataInicio=${dataInicio}&dataFinal=${dataFinal}`;
+            } else {
+                url = `http://localhost:8080/movimentacoes/estoque?estoqueId=${estoqueId}`;
+            }
+
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    "Authorization": token
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao buscar movimentações");
+                    return response.json();
+                })
+                .then(movimentacoes => {
+                    renderizarMovimentacoes(movimentacoes);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Erro ao carregar movimentações.");
                 });
         }
 
@@ -233,13 +338,36 @@
             window.location.href = "home.html";
         };
 
-        // abrir/fechar formulário
+        // abrir/fechar formulário produto
         document.getElementById("btn-criar").onclick = () => {
             const formDiv = document.getElementById("form-criar");
             formDiv.style.display = formDiv.style.display === "block" ? "none" : "block";
         };
 
-        // submit do formulário
+        // abrir/fechar movimentações
+        document.getElementById("btn-movimentacoes").onclick = () => {
+            const movDiv = document.getElementById("movimentacoes-section");
+            if (movDiv.style.display === "block") {
+                movDiv.style.display = "none";
+            } else {
+                movDiv.style.display = "block";
+                carregarMovimentacoes();
+            }
+        };
+
+        // filtro movimentações
+        document.getElementById("btn-filtrar").onclick = () => {
+            const dataInicio = document.getElementById("dataInicio").value;
+            const dataFinal = document.getElementById("dataFinal").value;
+
+            if (dataInicio && dataFinal) {
+                carregarMovimentacoes(dataInicio, dataFinal);
+            } else {
+                carregarMovimentacoes();
+            }
+        };
+
+        // submit do formulário produto
         document.getElementById("produtoForm").onsubmit = (e) => {
             e.preventDefault();
 

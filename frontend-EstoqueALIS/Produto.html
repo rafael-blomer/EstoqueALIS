@@ -28,14 +28,30 @@
 
         #btn-logout,
         #btn-voltar {
-            background-color: #444;
-            color: white;
             padding: 8px 12px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             margin-left: 10px;
             font-size: 14px;
+        }
+
+        #btn-logout {
+            background-color: #f44336;
+            color: white;
+        }
+
+        #btn-voltar {
+            background-color: #444;
+            color: white;
+        }
+
+        #btn-voltar:hover {
+            background-color: #555;
+        }
+
+        #btn-logout:hover {
+            background-color: #d32f2f;
         }
 
         main {
@@ -196,10 +212,13 @@
         carregarProduto();
 
         function renderizarMovimentacoes(movs) {
+            movs.sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+
             let html = `<div class="action-section"><h4>Movimentações</h4>
-      <table><thead>
-        <tr><th>ID</th><th>Data/Hora</th><th>Tipo</th><th>Itens</th></tr>
-      </thead><tbody>`;
+    <table><thead>
+      <tr><th>ID</th><th>Data/Hora</th><th>Tipo</th><th>Itens</th></tr>
+    </thead><tbody>`;
+
             movs.forEach(m => {
                 let itensHtml = "<ul>";
                 m.itensMovimentacoesLote.forEach(i => {
@@ -207,11 +226,11 @@
                 });
                 itensHtml += "</ul>";
                 html += `<tr>
-        <td>${m.id}</td>
-        <td>${new Date(m.dataHora).toLocaleString()}</td>
-        <td>${m.tipoMovimentacao}</td>
-        <td>${itensHtml}</td>
-      </tr>`;
+      <td>${m.id}</td>
+      <td>${new Date(m.dataHora).toLocaleString()}</td>
+      <td>${m.tipoMovimentacao}</td>
+      <td>${itensHtml}</td>
+    </tr>`;
             });
             html += "</tbody></table></div>";
             document.getElementById("actionArea").innerHTML = html;
@@ -306,14 +325,36 @@
             };
         }
 
-        function mostrarMovimentacoes() {
-            fetch(`http://localhost:8080/movimentacoes/produto?estoqueId=${produto.estoque.estoqueId}&produtoId=${produtoId}`, {
-                headers: { "Authorization": token }
-            })
+    function mostrarMovimentacoes() {
+        document.getElementById("actionArea").innerHTML = `
+      <div class="action-section">
+        <h4>Filtrar Movimentações</h4>
+        <h5>Caso queira ver todas as movimentações sem filtro de data, apenas clique em <b>buscar</b>.</h5>
+        <form id="formFiltroMov">
+          <label>Data Início: <input type="date" id="dataInicio"></label>
+          <label>Data Final: <input type="date" id="dataFinal"></label>
+          <button type="submit">Buscar</button>
+        </form>
+        <div id="lista-movimentacoes"></div>
+      </div>`;
+
+        document.getElementById("formFiltroMov").onsubmit = e => {
+            e.preventDefault();
+            const dataInicio = document.getElementById("dataInicio").value;
+            const dataFinal = document.getElementById("dataFinal").value;
+
+            let url = `http://localhost:8080/movimentacoes/produto?estoqueId=${produto.estoque.estoqueId}&produtoId=${produtoId}`;
+
+            if (dataInicio && dataFinal) {
+                url = `http://localhost:8080/movimentacoes/produtodata?estoqueId=${produto.estoque.estoqueId}&produtoId=${produtoId}&dataInicio=${dataInicio}&dataFinal=${dataFinal}`;
+            }
+
+            fetch(url, { headers: { "Authorization": token } })
                 .then(r => r.json())
                 .then(movs => renderizarMovimentacoes(movs))
                 .catch(() => alert("Erro ao carregar movimentações"));
-        }
+        };
+    }
 
         function desativarProduto() {
             if (confirm("Tem certeza que deseja desativar este produto?")) {

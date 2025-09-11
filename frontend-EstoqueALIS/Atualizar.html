@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,19 +10,19 @@
             margin: 0;
             height: 100vh;
             display: flex;
-            justify-content: center; 
-            align-items: center; 
-            background-color: #f2f2f2; 
+            justify-content: center;
+            align-items: center;
+            background-color: #f2f2f2;
             font-family: Arial, sans-serif;
         }
 
         #formAtualizar {
             border: 2px solid black;
-            border-radius: 10px; 
+            border-radius: 10px;
             padding: 30px;
             background-color: #fff;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-            width: 300px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
             text-align: center;
         }
 
@@ -45,6 +46,11 @@
             padding: 8px;
             border-radius: 5px;
             border: 1px solid #ccc;
+        }
+
+        input[readonly] {
+            background-color: #f9f9f9;
+            cursor: not-allowed;
         }
 
         button {
@@ -83,21 +89,36 @@
         }
     </style>
 </head>
+
 <body>
     <form id="formAtualizar">
         <h1>Atualizar Dados</h1>
+
         <div>
             <label for="nome">Nome</label>
             <input type="text" id="nome" placeholder="Novo nome (opcional)">
         </div>
+
         <div>
             <label for="telefone">Telefone</label>
             <input type="text" id="telefone" placeholder="Ex: 11987654321 (opcional)">
         </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input type="text" id="email" readonly>
+        </div>
+
+        <div>
+            <label for="cnpj">CNPJ</label>
+            <input type="text" id="cnpj" readonly>
+        </div>
+
         <div>
             <label for="senha">Senha</label>
             <input type="password" id="senha" placeholder="Nova senha (opcional)">
         </div>
+
         <button type="submit" id="btnSalvar">Salvar Alterações</button>
         <button type="button" id="btnDesativar">Desativar Usuário</button>
         <button type="button" id="btnVoltar">Voltar para Página Principal</button>
@@ -106,8 +127,40 @@
     <script>
         const form = document.getElementById("formAtualizar");
 
+        // --- CARREGAR DADOS ATUAIS DO USUÁRIO ---
+        window.onload = function () {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Você precisa estar logado!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            fetch("http://localhost:8080/usuario", {
+                headers: {
+                    "Authorization": token
+                }
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao carregar usuário");
+                    return response.json();
+                })
+                .then(usuario => {
+                    // Preenche os campos com os dados atuais
+                    document.getElementById("nome").value = usuario.nome || "";
+                    document.getElementById("telefone").value = usuario.telefone || "";
+                    document.getElementById("email").value = usuario.email || "";
+                    document.getElementById("cnpj").value = usuario.cnpj || "";
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                    alert("Falha ao carregar dados do usuário.");
+                });
+        };
+
         // --- SALVAR ALTERAÇÕES ---
-        form.addEventListener("submit", function(event) {
+        form.addEventListener("submit", function (event) {
             event.preventDefault();
 
             const nome = document.getElementById("nome").value.trim();
@@ -140,22 +193,22 @@
                 },
                 body: JSON.stringify(dadosAtualizacao)
             })
-            .then(response => {
-                if (!response.ok) throw new Error("Erro ao atualizar usuário");
-                return response.json();
-            })
-            .then(data => {
-                alert("Dados atualizados com sucesso!");
-                window.location.href = "home.html";
-            })
-            .catch(error => {
-                console.error("Erro:", error);
-                alert("Falha ao atualizar os dados.");
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao atualizar usuário");
+                    return response.json();
+                })
+                .then(data => {
+                    alert("Dados atualizados com sucesso!");
+                    window.location.href = "home.html";
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                    alert("Falha ao atualizar os dados.");
+                });
         });
 
         // --- DESATIVAR USUÁRIO ---
-        document.getElementById("btnDesativar").addEventListener("click", function() {
+        document.getElementById("btnDesativar").addEventListener("click", function () {
             const token = localStorage.getItem("token");
 
             if (!confirm("Tem certeza que deseja desativar sua conta?")) {
@@ -168,22 +221,23 @@
                     "Authorization": token
                 }
             })
-            .then(response => {
-                if (!response.ok) throw new Error("Erro ao desativar usuário");
-                alert("Usuário desativado com sucesso!");
-                localStorage.removeItem("token");
-                window.location.href = "login.html";
-            })
-            .catch(error => {
-                console.error("Erro:", error);
-                alert("Falha ao desativar usuário.");
-            });
+                .then(response => {
+                    if (!response.ok) throw new Error("Erro ao desativar usuário");
+                    alert("Usuário desativado com sucesso!");
+                    localStorage.removeItem("token");
+                    window.location.href = "login.html";
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                    alert("Falha ao desativar usuário.");
+                });
         });
 
         // --- VOLTAR PARA HOME ---
-        document.getElementById("btnVoltar").addEventListener("click", function() {
+        document.getElementById("btnVoltar").addEventListener("click", function () {
             window.location.href = "home.html";
         });
     </script>
 </body>
+
 </html>
