@@ -391,7 +391,6 @@
                     return response.json();
                 })
                 .then(() => {
-                    alert("Produto criado com sucesso!");
                     document.getElementById("produtoForm").reset();
                     document.getElementById("form-criar").style.display = "none";
                     carregarProdutos();
