@@ -9,29 +9,98 @@
             margin: 0;
             height: 100vh;
             display: flex;
-            justify-content: center; 
-            align-items: center; 
-            background-color: #f2f2f2; 
+            justify-content: center;
+            align-items: center;
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
         }
 
-        #form1 {
+        #formLogin {
             border: 2px solid black;
-            border-radius: 10px; 
+            border-radius: 10px;
             padding: 30px;
             background-color: #fff;
             box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
+            width: 320px;
             text-align: center;
         }
 
+        h1 {
+            margin-bottom: 20px;
+        }
+
         div {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         button {
-            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #btnEntrar {
+            background-color: #4CAF50;
+        }
+
+        #btnEntrar:hover {
+            background-color: #45a049;
+        }
+
+        #btnCadastrar {
+            background-color: #0275d8;
+        }
+
+        #btnCadastrar:hover {
+            background-color: #025aa5;
+        }
+
+        #btnEsqueci {
+            background-color: #f0ad4e;
+        }
+
+        #btnEsqueci:hover {
+            background-color: #ec971f;
+        }
+
+                .senha-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .senha-container input {
+            flex: 1;
+        }
+
+        .senha-container button {
+            margin-left: 5px;
+            padding: 6px;
+            font-size: 12px;
+            width: auto;
+            background-color: #6c757d;
+        }
+
+        .senha-container button:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
@@ -39,25 +108,30 @@
     <form id="formLogin">
         <h1>Login</h1>
         <div>
-            <label for="email">Insira seu email: </label> 
-            <input type="text" id="email">
+            <label for="email">Email</label> 
+            <input type="text" id="email" required>
         </div>
         <div>
-            <label for="senha">Insira sua senha: </label>
-            <input type="password" id="senha">
+            <label for="senha">Senha</label>
+            <div class="senha-container">
+                <input type="password" id="senha" required>
+                <button type="button" onclick="toggleSenha('senha')">👁</button>
+            </div>
         </div>
-        <button type="submit">Entrar</button>
-        <div>
-            <label for="cadastro">Não possui cadastro?</label>
-            <a href="/cadastro.html"><button type="button">Cadastrar</button></a>
-        </div>
+        <button type="submit" id="btnEntrar">Entrar</button>
+        <button type="button" id="btnCadastrar" onclick="window.location.href='cadastro.html'">Cadastrar</button>
+        <button type="button" id="btnEsqueci">Esqueci minha senha</button>
     </form>
+
     <script>
-       
-       const form = document.getElementById("formLogin");
+        function toggleSenha(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        }
+        const form = document.getElementById("formLogin");
 
         form.addEventListener("submit", function(event) {
-            event.preventDefault(); 
+            event.preventDefault();
 
             const email = document.getElementById("email").value;
             const senha = document.getElementById("senha").value;
@@ -67,10 +141,7 @@
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    email: email,
-                    senha: senha
-                })
+                body: JSON.stringify({ email, senha })
             })
             .then(response => {
                 if (!response.ok) {

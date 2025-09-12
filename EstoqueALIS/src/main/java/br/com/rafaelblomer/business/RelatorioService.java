@@ -26,7 +26,7 @@ public class RelatorioService {
     }
 
     public void verificarLotesVencendo() {
-        int[] diasAviso = {20, 14, 7, 3};
+        int[] diasAviso = {30, 20, 14, 7, 3};
 
         for (int dias : diasAviso) {
             LocalDate dataAlvo = LocalDate.now().plusDays(dias);

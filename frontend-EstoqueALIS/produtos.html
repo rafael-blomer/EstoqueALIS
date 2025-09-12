@@ -143,6 +143,15 @@
         #filtro-movimentacoes input[type="date"] {
             width: 575px;
         }
+
+        .produto-item:hover {
+            background-color: #f0f0f0;
+            transition: background-color 0.3s ease;
+        }
+
+        .produto-item {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -252,7 +261,7 @@
                     lista.innerHTML = "";
                     produtos.forEach(p => {
                         const tr = document.createElement("tr");
-                        tr.style.cursor = "pointer";
+                        tr.classList.add("produto-item");
                         tr.onclick = () => {
                             window.location.href = `produto.html?id=${p.id}`;
                         };

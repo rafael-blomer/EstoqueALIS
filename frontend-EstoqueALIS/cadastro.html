@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,98 +10,186 @@
             margin: 0;
             height: 100vh;
             display: flex;
-            justify-content: center; 
-            align-items: center; 
-            background-color: #f2f2f2; 
+            justify-content: center;
+            align-items: center;
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
         }
 
-        #form1 {
+        #formCadastro {
             border: 2px solid black;
-            border-radius: 10px; 
+            border-radius: 10px;
             padding: 30px;
             background-color: #fff;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h1 {
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
             text-align: center;
         }
 
+        h1 {
+            margin-bottom: 20px;
+        }
+
         div {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
 
         button {
-            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #btnCadastrar {
+            background-color: #4CAF50;
+        }
+
+        #btnCadastrar:hover {
+            background-color: #45a049;
+        }
+
+        #btnVoltar {
+            background-color: #0275d8;
+        }
+
+        #btnVoltar:hover {
+            background-color: #025aa5;
+        }
+
+        .senha-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .senha-container input {
+            flex: 1;
+        }
+
+        .senha-container button {
+            margin-left: 5px;
+            padding: 6px;
+            font-size: 12px;
+            width: auto;
+            background-color: #6c757d;
+        }
+
+        .senha-container button:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
+
 <body>
-    <form id="formCadastro" action="">
+    <form id="formCadastro">
         <h1>Cadastro</h1>
         <div>
-            <label for="nome">Insira seu nome: </label> 
-            <input type="text" id="nome">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" required>
         </div>
         <div>
-            <label for="email">Insira seu email: </label> 
-            <input type="text" id="email">
+            <label for="email">Email</label>
+            <input type="text" id="email" required>
         </div>
         <div>
-            <label for="cnpj">Insira seu CNPJ: </label> 
-            <input type="text" id="cnpj">
+            <label for="cnpj">CNPJ (apenas números)</label>
+            <input type="text" id="cnpj" required>
         </div>
         <div>
-            <label for="telefone">Insira seu telefone: </label> 
-            <input type="text" id="telefone">
+            <label for="telefone">Telefone (com DDD)</label>
+            <input type="text" id="telefone" required>
         </div>
         <div>
-            <label for="senha">Insira sua senha: </label>
-            <input type="password" id="senha">
+            <label for="senha">Senha</label>
+            <div class="senha-container">
+                <input type="password" id="senha" required>
+                <button type="button" onclick="toggleSenha('senha')">👁</button>
+            </div>
         </div>
-        <button type="submit">Cadastrar</button>
+        <div>
+            <label for="confirmarSenha">Confirmar Senha</label>
+            <div class="senha-container">
+                <input type="password" id="confirmarSenha" required>
+                <button type="button" onclick="toggleSenha('confirmarSenha')">👁</button>
+            </div>
+        </div>
+        <button type="submit" id="btnCadastrar">Cadastrar</button>
+        <button type="button" id="btnVoltar" onclick="window.location.href='login.html'">Voltar</button>
     </form>
+
     <script>
-       
-       const form = document.getElementById("formCadastro");
+        function toggleSenha(id) {
+            const input = document.getElementById(id);
+            input.type = input.type === "password" ? "text" : "password";
+        }
 
-        form.addEventListener("submit", function(event) {
-            event.preventDefault(); 
+        const form = document.getElementById("formCadastro");
 
-            const email = document.getElementById("email").value;
-            const nome = document.getElementById("nome").value;
-            const cnpj = document.getElementById("cnpj").value;
-            const telefone = document.getElementById("telefone").value;
-            const senha = document.getElementById("senha").value;
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();
 
-            fetch("http://localhost:8080/usuario/cadastro", { 
+            const nome = document.getElementById("nome").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const cnpj = document.getElementById("cnpj").value.trim();
+            const telefone = document.getElementById("telefone").value.trim();
+            const senha = document.getElementById("senha").value.trim();
+            const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
+
+            // validação de senhas iguais
+            if (senha !== confirmarSenha) {
+                alert("As senhas não conferem!");
+                return;
+            }
+
+            const dados = {
+                nome: nome,
+                email: email,
+                cnpj: cnpj,
+                telefone: telefone,
+                senha: senha
+            };
+
+            fetch("http://localhost:8080/usuario/cadastro", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    nome: nome,
-                    email: email,
-                    cnpj: cnpj,
-                    telefone: telefone,
-                    senha: senha
+                body: JSON.stringify(dados)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(err => { throw new Error(err); });
+                    }
+                    return response.json();
                 })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Erro na requisição");
-                }
-                return response.json();
-            })
-            .then(data => {
-                alert("Cadastro realizado com sucesso!");
-                window.location.href = "login.html";
-            })
-            .catch(error => {
-                console.error("Erro:", error);
-                alert("Falha ao realizar cadastro.");
-            });
+                .then(data => {
+                    alert("Cadastro realizado com sucesso!");
+                    window.location.href = "login.html";
+                })
+                .catch(error => {
+                    console.error("Erro:", error);
+                    alert("Falha ao realizar cadastro: " + error.message);
+                });
         });
     </script>
 </body>
+
 </html>
