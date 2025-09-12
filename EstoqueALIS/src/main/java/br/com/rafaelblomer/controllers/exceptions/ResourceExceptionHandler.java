@@ -1,9 +1,6 @@
 package br.com.rafaelblomer.controllers.exceptions;
 
-import br.com.rafaelblomer.business.exceptions.AcaoNaoPermitidaException;
-import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
-import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
-import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
+import br.com.rafaelblomer.business.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -43,6 +40,13 @@ public class ResourceExceptionHandler {
     public ResponseEntity<StandardError> dataConflictException(DadoIrregularException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
         StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Dado irregular passado.", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(VerficacaoEmailException.class)
+    public ResponseEntity<StandardError> emailException(VerficacaoEmailException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Houve um erro ao verificar seu email.", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(err);
     }
 

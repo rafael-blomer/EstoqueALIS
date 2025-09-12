@@ -1,5 +1,8 @@
 package br.com.rafaelblomer.business;
 
+import br.com.rafaelblomer.business.exceptions.VerficacaoEmailException;
+import br.com.rafaelblomer.infrastructure.entities.VerificacaoTokenUsuario;
+import br.com.rafaelblomer.infrastructure.repositories.VerificacaoTokenUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +25,9 @@ import br.com.rafaelblomer.infrastructure.repositories.UsuarioRepository;
 import br.com.rafaelblomer.infrastructure.security.JwtUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 public class UsuarioService {
 
@@ -40,11 +46,22 @@ public class UsuarioService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private VerificacaoTokenUsuarioRepository tokenRepository;
+
     @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioCadastroDTO entityCadastro) {
         Usuario entity = converter.dtoCadastroParaEntity(entityCadastro);
         entity.setSenha(encoder.encode(entity.getSenha()));
-        return converter.entityParaResponseDTO(repository.save(entity));
+        entity = repository.save(entity);
+        String tokenString = UUID.randomUUID().toString();
+        VerificacaoTokenUsuario verificacaoTokenUsuario = new VerificacaoTokenUsuario(tokenString, entity);
+        tokenRepository.save(verificacaoTokenUsuario);
+        emailService.sendVerificationEmail(entity, tokenString);
+        return converter.entityParaResponseDTO(entity);
     }
 
     @Transactional
@@ -78,7 +95,24 @@ public class UsuarioService {
         return converter.entityParaResponseDTO(usuario);
     }
 
+    public String verificarUsuario(String token) {
+        VerificacaoTokenUsuario verificationToken = tokenRepository.findByToken(token);
+        verificarTokenEmail(verificationToken);
+        Usuario usuario = verificationToken.getUser();
+        usuario.setAtivo(true);
+        repository.save(usuario);
+        tokenRepository.delete(verificationToken);
+        return "valido";
+    }
+
     //ÚTEIS
+
+    private void verificarTokenEmail(VerificacaoTokenUsuario verificationToken) {
+        if (verificationToken == null)
+            throw new VerficacaoEmailException("O token de verificação está inválido");
+        else if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now()))
+            throw new VerficacaoEmailException("O token expirou.");
+    }
 
     public Usuario findByToken(String token) {
         String email = jwtUtil.extrairEmailToken(token.substring(7));

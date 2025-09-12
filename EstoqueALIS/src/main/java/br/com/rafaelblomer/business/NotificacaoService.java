@@ -1,6 +1,7 @@
 package br.com.rafaelblomer.business;
 
 import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -10,7 +11,9 @@ import java.util.List;
 
 @Service
 public class NotificacaoService {
-    private final String TELEGRAM_BOT_TOKEN = "";
+
+    @Value("${TOKEN_BOT_TELEGRAM}")
+    private String TELEGRAM_BOT_TOKEN;
     private final String TELEGRAM_CHAT_ID = "";
 
     public void enviarAvisoLotes(List<LoteProduto> lotes, int dias) {

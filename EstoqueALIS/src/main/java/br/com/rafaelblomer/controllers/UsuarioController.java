@@ -7,6 +7,7 @@ import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
 import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,5 +42,10 @@ public class UsuarioController {
     @PatchMapping("/atualizar")
     public ResponseEntity<UsuarioResponseDTO> atualizarDados (@RequestHeader("Authorization") String token, @Valid @RequestBody UsuarioAtualizacaoDTO dto) {
         return ResponseEntity.ok().body(service.atualizarUsuario(token, dto));
+    }
+
+    @GetMapping("/verificaremail")
+    public ResponseEntity<String> verificarUsuario(@RequestParam("token") String token) {
+        return ResponseEntity.ok().body(service.verificarUsuario(token));
     }
 }

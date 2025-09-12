@@ -38,7 +38,7 @@ public class Usuario {
         this.cnpj = cnpj;
         this.telefone = telefone;
         this.senha = senha;
-        this.ativo = true;
+        this.ativo = false;
         this.estoques = estoques;
     }
 
