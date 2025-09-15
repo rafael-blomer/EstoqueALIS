@@ -24,6 +24,7 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             width: 320px;
             text-align: center;
+            position: relative;
         }
 
         h1 {
@@ -95,6 +96,28 @@
         .senha-container button:hover {
             background-color: #5a6268;
         }
+
+        /* Spinner */
+        #spinner {
+            display: none;
+            margin: 15px auto 0;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
@@ -133,6 +156,9 @@
         </div>
         <button type="submit" id="btnCadastrar">Cadastrar</button>
         <button type="button" id="btnVoltar" onclick="window.location.href='login.html'">Ir para Login</button>
+
+        <!-- Spinner -->
+        <div id="spinner"></div>
     </form>
 
     <script>
@@ -142,6 +168,8 @@
         }
 
         const form = document.getElementById("formCadastro");
+        const spinner = document.getElementById("spinner");
+        const btnCadastrar = document.getElementById("btnCadastrar");
 
         form.addEventListener("submit", function (event) {
             event.preventDefault();
@@ -153,7 +181,6 @@
             const senha = document.getElementById("senha").value.trim();
             const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
 
-            // validação de senhas iguais
             if (senha !== confirmarSenha) {
                 alert("As senhas não conferem!");
                 return;
@@ -166,6 +193,10 @@
                 telefone: telefone,
                 senha: senha
             };
+
+            // Mostra o spinner e desabilita botão
+            spinner.style.display = "block";
+            btnCadastrar.disabled = true;
 
             fetch("http://localhost:8080/usuario/cadastro", {
                 method: "POST",
@@ -181,12 +212,16 @@
                     return response.json();
                 })
                 .then(data => {
-                    alert("Cadastro realizado com sucesso!");
+                    alert("Cadastro realizado com sucesso! Verifique seu email para continuar.");
                     window.location.href = "login.html";
                 })
                 .catch(error => {
                     console.error("Erro:", error);
                     alert("Falha ao realizar cadastro: " + error.message);
+                })
+                .finally(() => {
+                    spinner.style.display = "none";
+                    btnCadastrar.disabled = false;
                 });
         });
     </script>

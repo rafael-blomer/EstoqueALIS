@@ -1,5 +1,6 @@
 package br.com.rafaelblomer.business;
 
+import br.com.rafaelblomer.business.dtos.*;
 import br.com.rafaelblomer.business.exceptions.VerficacaoEmailException;
 import br.com.rafaelblomer.infrastructure.entities.VerificacaoTokenUsuario;
 import br.com.rafaelblomer.infrastructure.repositories.VerificacaoTokenUsuarioRepository;
@@ -13,10 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.rafaelblomer.business.converters.UsuarioConverter;
-import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.business.exceptions.ObjetoInativoException;
 import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
@@ -82,7 +79,7 @@ public class UsuarioService {
 
     @Transactional
     public String realizarLogin(UsuarioLoginDTO dto) {
-        Usuario usuario = repository.findByEmail(dto.email()).orElseThrow(() -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
+        Usuario usuario = buscarPorEmail(dto.email());
         verificarUsuarioAtivo(usuario);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(dto.email(), dto.senha()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -105,7 +102,31 @@ public class UsuarioService {
         return "valido";
     }
 
+    public String esqueciSenha(String email) {
+        Usuario usuario = buscarPorEmail(email);
+        String token = UUID.randomUUID().toString();
+        VerificacaoTokenUsuario verificacaoTokenUsuario = new VerificacaoTokenUsuario(token, usuario);
+        tokenRepository.save(verificacaoTokenUsuario);
+        emailService.sendChangePasswordEmail(usuario, token);
+        return "Email para alteração de senha enviado.";
+    }
+
+    public String alterarSenha (String token, String senhaNova) {
+        VerificacaoTokenUsuario verificationToken = tokenRepository.findByToken(token);
+        verificarTokenEmail(verificationToken);
+        Usuario usuario = verificationToken.getUser();
+        usuario.setSenha(encoder.encode(senhaNova));
+        repository.save(usuario);
+        tokenRepository.delete(verificationToken);
+        return "Senha alterada com sucesso.";
+    }
+
     //ÚTEIS
+
+    private Usuario buscarPorEmail(String email) {
+        return repository.findByEmail(email).orElseThrow(
+                () -> new ObjetoNaoEncontradoException("Email não cadastrado. Tente novamente"));
+    }
 
     private void verificarTokenEmail(VerificacaoTokenUsuario verificationToken) {
         if (verificationToken == null)

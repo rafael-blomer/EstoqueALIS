@@ -1,10 +1,7 @@
 package br.com.rafaelblomer.controllers;
 
 import br.com.rafaelblomer.business.UsuarioService;
-import br.com.rafaelblomer.business.dtos.UsuarioAtualizacaoDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioCadastroDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioLoginDTO;
-import br.com.rafaelblomer.business.dtos.UsuarioResponseDTO;
+import br.com.rafaelblomer.business.dtos.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,5 +44,15 @@ public class UsuarioController {
     @GetMapping("/verificaremail")
     public ResponseEntity<String> verificarUsuario(@RequestParam("token") String token) {
         return ResponseEntity.ok().body(service.verificarUsuario(token));
+    }
+
+    @PostMapping("/esquecisenha")
+    public ResponseEntity<String> esqueciSenha(@RequestParam String email) {
+        return ResponseEntity.ok().body(service.esqueciSenha(email));
+    }
+
+    @PostMapping("/alterarsenha")
+    public ResponseEntity<String> alterarSenha(@RequestParam String token, @RequestParam String novaSenha) {
+        return ResponseEntity.ok().body(service.alterarSenha(token, novaSenha));
     }
 }

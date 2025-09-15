@@ -45,6 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/usuario/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/usuario/verificaremail").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/esquecisenha").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/alterarsenha").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
