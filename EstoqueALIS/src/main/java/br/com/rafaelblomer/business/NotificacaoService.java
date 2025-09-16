@@ -14,7 +14,7 @@ public class NotificacaoService {
 
     @Value("${TOKEN_BOT_TELEGRAM}")
     private String TELEGRAM_BOT_TOKEN;
-    private final String TELEGRAM_CHAT_ID = "";
+    private final String TELEGRAM_CHAT_ID = "2028213081";
 
     public void enviarAvisoLotes(List<LoteProduto> lotes, int dias) {
         if (lotes == null || lotes.isEmpty()) {

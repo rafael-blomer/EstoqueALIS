@@ -145,8 +145,6 @@ public class UsuarioService {
             antigo.setNome(novo.nome());
         if (novo.telefone() != null)
             antigo.setTelefone(novo.telefone());
-        if (novo.senha() != null)
-            antigo.setSenha(encoder.encode(novo.senha()));
     }
 
     private void verificarUsuarioAtivo(Usuario entity) {

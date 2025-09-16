@@ -114,11 +114,6 @@
             <input type="text" id="cnpj" readonly>
         </div>
 
-        <div>
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" placeholder="Nova senha (opcional)">
-        </div>
-
         <button type="submit" id="btnSalvar">Salvar Alterações</button>
         <button type="button" id="btnDesativar">Desativar Usuário</button>
         <button type="button" id="btnVoltar">Voltar para Página Principal</button>
@@ -165,7 +160,6 @@
 
             const nome = document.getElementById("nome").value.trim();
             const telefone = document.getElementById("telefone").value.trim();
-            const senha = document.getElementById("senha").value.trim();
 
             const token = localStorage.getItem("token");
 
@@ -178,7 +172,6 @@
             const dadosAtualizacao = {};
             if (nome) dadosAtualizacao.nome = nome;
             if (telefone) dadosAtualizacao.telefone = telefone;
-            if (senha) dadosAtualizacao.senha = senha;
 
             if (Object.keys(dadosAtualizacao).length === 0) {
                 alert("Preencha pelo menos um campo para atualizar.");

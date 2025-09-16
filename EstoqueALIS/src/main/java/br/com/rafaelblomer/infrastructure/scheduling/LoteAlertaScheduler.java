@@ -11,7 +11,7 @@ public class LoteAlertaScheduler {
     @Autowired
     private RelatorioService relatorioService;
 
-    @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(fixedDelay = 20000)
     public void executarVerificacaoDiaria() {
         relatorioService.verificarLotesVencendo();
     }
