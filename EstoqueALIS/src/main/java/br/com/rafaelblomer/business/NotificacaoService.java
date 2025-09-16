@@ -75,7 +75,7 @@ public class NotificacaoService {
         }
     }
 
-    private String escaparMarkdownV2(String texto) {
+    public String escaparMarkdownV2(String texto) {
         if (texto == null) return "";
         String[] specialChars = {"_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"};
         for (String specialChar : specialChars) {
