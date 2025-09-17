@@ -121,7 +121,7 @@ public class MovimentacaoEstoqueService {
 
     @EventListener
     public void registrarEntrada(LoteCriadoEvent event) {
-        repository.save(converter.loteProdParaMovEstoque(event.getLoteProduto()));
+        repository.save(converter.loteProdParaMovEstoque(event.loteProduto()));
     }
 
     private void verificarQuantidadeTotalProduto(MovimentacaoSaidaDTO dto, Produto produto) {

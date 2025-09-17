@@ -58,7 +58,6 @@ class UsuarioServiceTest {
     @Mock
     private VerificacaoTokenUsuarioRepository tokenRepository;
 
-    // Variáveis de apoio
     private Usuario usuario;
     private UsuarioCadastroDTO cadastroDTO;
     private final String FAKE_EMAIL = "teste@email.com";
@@ -75,41 +74,33 @@ class UsuarioServiceTest {
         usuario.setId(1L);
         usuario.setEmail(FAKE_EMAIL);
         usuario.setSenha(FAKE_PASSWORD);
-        usuario.setAtivo(true); // Usuário ativo por padrão nos testes
+        usuario.setAtivo(true);
     }
 
     @Test
     @DisplayName("Deve criar um usuário com sucesso e enviar email de verificação")
     void criarUsuario_ComDadosValidos_SalvaUsuarioEEnviaEmail() {
-        // Arrange (Organizar)
         when(converter.dtoCadastroParaEntity(any(UsuarioCadastroDTO.class))).thenReturn(usuario);
         when(encoder.encode(FAKE_PASSWORD)).thenReturn(HASHED_PASSWORD);
         when(repository.save(any(Usuario.class))).thenReturn(usuario);
         when(converter.entityParaResponseDTO(any(Usuario.class)))
                 .thenReturn(new UsuarioResponseDTO(1L, "Teste", FAKE_EMAIL, "99999999999", "00623904000173", new ArrayList<>()));
 
-        // Act (Agir)
         UsuarioResponseDTO resultado = usuarioService.criarUsuario(cadastroDTO);
 
-        // Assert (Verificar)
         assertThat(resultado).isNotNull();
         assertThat(resultado.email()).isEqualTo(FAKE_EMAIL);
 
-        // Verifica se a senha foi codificada
         verify(encoder, times(1)).encode(FAKE_PASSWORD);
-        // Verifica se o usuário foi salvo
         verify(repository, times(1)).save(usuario);
-        // Captura o token de verificação que foi salvo
         ArgumentCaptor<VerificacaoTokenUsuario> tokenCaptor = ArgumentCaptor.forClass(VerificacaoTokenUsuario.class);
         verify(tokenRepository, times(1)).save(tokenCaptor.capture());
-        // Verifica se o email de verificação foi enviado com o token correto
         verify(emailService, times(1)).sendVerificationEmail(eq(usuario), eq(tokenCaptor.getValue().getToken()));
     }
 
     @Test
     @DisplayName("Deve realizar login com sucesso para usuário ativo e credenciais válidas")
     void realizarLogin_ComUsuarioAtivoECredenciaisValidas_RetornaBearerToken() {
-        // Arrange
         UsuarioLoginDTO loginDTO = new UsuarioLoginDTO(FAKE_EMAIL, FAKE_PASSWORD);
         Authentication authentication = mock(Authentication.class);
 
@@ -118,10 +109,8 @@ class UsuarioServiceTest {
         when(authentication.getName()).thenReturn(FAKE_EMAIL);
         when(jwtUtil.generateToken(FAKE_EMAIL)).thenReturn(FAKE_JWT);
 
-        // Act
         String resultado = usuarioService.realizarLogin(loginDTO);
 
-        // Assert
         assertThat(resultado).isEqualTo("Bearer " + FAKE_JWT);
         verify(authenticationManager, times(1))
                 .authenticate(new UsernamePasswordAuthenticationToken(FAKE_EMAIL, FAKE_PASSWORD));
@@ -130,62 +119,50 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar logar com usuário inativo")
     void realizarLogin_ComUsuarioInativo_LancaObjetoInativoException() {
-        // Arrange
         usuario.setAtivo(false); // Define o usuário como inativo
         UsuarioLoginDTO loginDTO = new UsuarioLoginDTO(FAKE_EMAIL, FAKE_PASSWORD);
         when(repository.findByEmail(FAKE_EMAIL)).thenReturn(Optional.of(usuario));
 
-        // Act & Assert
         assertThatThrownBy(() -> usuarioService.realizarLogin(loginDTO))
                 .isInstanceOf(ObjetoInativoException.class)
                 .hasMessage("O usuário não está ativo.");
 
-        // Garante que o processo de autenticação nem começou
         verify(authenticationManager, never()).authenticate(any());
     }
 
     @Test
     @DisplayName("Deve verificar (ativar) um usuário com sucesso com um token válido")
     void verificarUsuario_ComTokenValido_AtivaUsuarioEExcluiToken() {
-        // Arrange
-        usuario.setAtivo(false); // Usuário começa inativo
+        usuario.setAtivo(false);
         String tokenString = "valid-token";
         VerificacaoTokenUsuario verificationToken = new VerificacaoTokenUsuario(tokenString, usuario);
 
         when(tokenRepository.findByToken(tokenString)).thenReturn(verificationToken);
 
-        // Act
         String resultado = usuarioService.verificarUsuario(tokenString);
 
-        // Assert
         assertThat(resultado).isEqualTo("valido");
 
-        // Captura o usuário salvo para verificar se foi ativado
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(repository, times(1)).save(usuarioCaptor.capture());
         assertThat(usuarioCaptor.getValue().getAtivo()).isTrue();
 
-        // Verifica se o token foi excluído
         verify(tokenRepository, times(1)).delete(verificationToken);
     }
 
     @Test
     @DisplayName("Deve lançar exceção ao tentar verificar usuário com token expirado")
     void verificarUsuario_ComTokenExpirado_LancaVerficacaoEmailException() {
-        // Arrange
         String tokenString = "expired-token";
         VerificacaoTokenUsuario verificationToken = new VerificacaoTokenUsuario(tokenString, usuario);
-        // Define a data de expiração para o passado
         verificationToken.setExpiryDate(LocalDateTime.now().minusMinutes(1));
 
         when(tokenRepository.findByToken(tokenString)).thenReturn(verificationToken);
 
-        // Act & Assert
         assertThatThrownBy(() -> usuarioService.verificarUsuario(tokenString))
                 .isInstanceOf(VerficacaoEmailException.class)
                 .hasMessage("O token expirou.");
 
-        // Garante que nenhuma alteração foi salva
         verify(repository, never()).save(any());
         verify(tokenRepository, never()).delete(any());
     }
@@ -193,11 +170,9 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar verificar usuário com token inválido")
     void verificarUsuario_ComTokenInvalido_LancaVerficacaoEmailException() {
-        // Arrange
         String tokenString = "invalid-token";
         when(tokenRepository.findByToken(tokenString)).thenReturn(null);
 
-        // Act & Assert
         assertThatThrownBy(() -> usuarioService.verificarUsuario(tokenString))
                 .isInstanceOf(VerficacaoEmailException.class)
                 .hasMessage("O token de verificação está inválido");
@@ -206,19 +181,13 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve atualizar os dados do usuário com sucesso")
     void atualizarUsuario_ComDadosValidos_SalvaAlteracoes() {
-        // Arrange
         UsuarioAtualizacaoDTO atualizacaoDTO = new UsuarioAtualizacaoDTO("Nome Atualizado", "11888888888");
-        // Simula o comportamento do método findByToken
         when(jwtUtil.extrairEmailToken(FAKE_JWT)).thenReturn(FAKE_EMAIL);
         when(repository.findByEmail(FAKE_EMAIL)).thenReturn(Optional.of(usuario));
-        // Simula que o novo telefone não está em uso
         when(repository.existsByTelefoneAndIdNot(atualizacaoDTO.telefone(), usuario.getId())).thenReturn(false);
 
-        // Act
         usuarioService.atualizarUsuario("Bearer " + FAKE_JWT, atualizacaoDTO);
 
-        // Assert
-        // Captura o usuário que foi salvo para verificar os dados
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(repository, times(1)).save(usuarioCaptor.capture());
 
@@ -230,14 +199,11 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar atualizar com telefone já existente")
     void atualizarUsuario_ComTelefoneJaExistente_LancaDadoIrregularException() {
-        // Arrange
         UsuarioAtualizacaoDTO atualizacaoDTO = new UsuarioAtualizacaoDTO("Nome", "11999999999");
         when(jwtUtil.extrairEmailToken(FAKE_JWT)).thenReturn(FAKE_EMAIL);
         when(repository.findByEmail(FAKE_EMAIL)).thenReturn(Optional.of(usuario));
-        // Simula que o telefone já existe em outro cadastro
         when(repository.existsByTelefoneAndIdNot(atualizacaoDTO.telefone(), usuario.getId())).thenReturn(true);
 
-        // Act & Assert
         assertThatThrownBy(() -> usuarioService.atualizarUsuario("Bearer " + FAKE_JWT, atualizacaoDTO))
                 .isInstanceOf(DadoIrregularException.class)
                 .hasMessage("Número de telefone irregular. Tente outro.");
@@ -248,7 +214,6 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve alterar a senha com sucesso com um token válido")
     void alterarSenha_ComTokenValido_AlteraSenhaEExcluiToken() {
-        // Arrange
         String newPassword = "newPassword123";
         String hashedNewPassword = "hashedNewPassword123";
         String tokenString = "valid-reset-token";
@@ -257,13 +222,10 @@ class UsuarioServiceTest {
         when(tokenRepository.findByToken(tokenString)).thenReturn(verificationToken);
         when(encoder.encode(newPassword)).thenReturn(hashedNewPassword);
 
-        // Act
         String resultado = usuarioService.alterarSenha(tokenString, newPassword);
 
-        // Assert
         assertThat(resultado).isEqualTo("Senha alterada com sucesso.");
 
-        // Captura o usuário salvo para verificar a nova senha
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(repository, times(1)).save(usuarioCaptor.capture());
         assertThat(usuarioCaptor.getValue().getSenha()).isEqualTo(hashedNewPassword);

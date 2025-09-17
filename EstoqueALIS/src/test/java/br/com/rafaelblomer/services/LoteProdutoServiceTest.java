@@ -42,7 +42,6 @@ class LoteProdutoServiceTest {
     @Mock
     private LoteProdutoConverter converter;
 
-    // Variáveis de apoio
     private Produto produto;
     private LoteProduto loteProduto;
     private LoteProdutoCadastroDTO cadastroDTO;
@@ -70,47 +69,38 @@ class LoteProdutoServiceTest {
     @Test
     @DisplayName("Deve cadastrar um lote com sucesso e publicar um evento")
     void cadastrarLote_ComDadosValidos_SalvaLoteEPublicaEvento() {
-        // Arrange (Organizar)
         when(produtoService.buscarProdutoId(PRODUTO_ID)).thenReturn(produto);
         when(converter.dtoParaLoteProdutoEntity(cadastroDTO, produto)).thenReturn(loteProduto);
         when(repository.save(loteProduto)).thenReturn(loteProduto);
         when(converter.paraLoteProdutoDTO(loteProduto))
                 .thenReturn(new LoteProdutoResponseDTO(1L, null, 100, null, "FAB-001"));
 
-        // Act (Agir)
         LoteProdutoResponseDTO resultado = loteProdutoService.cadastrarLote(cadastroDTO);
 
-        // Assert (Verificar)
         assertThat(resultado).isNotNull();
         assertThat(resultado.loteFabricante()).isEqualTo("FAB-001");
 
-        // Verifica se os serviços de validação foram chamados
         verify(produtoService, times(1)).buscarProdutoId(PRODUTO_ID);
         verify(produtoService, times(1)).verificarProdutoAtivo(produto);
 
-        // Verifica se o lote foi salvo
         verify(repository, times(1)).save(loteProduto);
 
-        // Captura o evento publicado para verificar seu conteúdo
         ArgumentCaptor<LoteCriadoEvent> eventCaptor = ArgumentCaptor.forClass(LoteCriadoEvent.class);
         verify(publisher, times(1)).publishEvent(eventCaptor.capture());
 
         LoteCriadoEvent eventoPublicado = eventCaptor.getValue();
-        assertThat(eventoPublicado.getLoteProduto()).isEqualTo(loteProduto);
+        assertThat(eventoPublicado.loteProduto()).isEqualTo(loteProduto);
     }
 
     @Test
     @DisplayName("Deve lançar exceção ao cadastrar lote com quantidade zero")
     void cadastrarLote_ComQuantidadeZero_LancaDadoIrregularException() {
-        // Arrange
         LoteProdutoCadastroDTO dtoInvalido = new LoteProdutoCadastroDTO(PRODUTO_ID, 0, LocalDate.now().plusDays(1), "FAB-002");
 
-        // Act & Assert
         assertThatThrownBy(() -> loteProdutoService.cadastrarLote(dtoInvalido))
                 .isInstanceOf(DadoIrregularException.class)
                 .hasMessage("A quantidade total do lote tem que ser maior que 0.");
 
-        // Garante que nenhuma interação com o banco ou publicador de eventos ocorreu
         verify(repository, never()).save(any());
         verify(publisher, never()).publishEvent(any());
     }
@@ -118,10 +108,8 @@ class LoteProdutoServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao cadastrar lote com data de validade no passado")
     void cadastrarLote_ComDataDeValidadeNoPassado_LancaDadoIrregularException() {
-        // Arrange
         LoteProdutoCadastroDTO dtoInvalido = new LoteProdutoCadastroDTO(PRODUTO_ID, 100, LocalDate.now().minusDays(1), "FAB-003");
 
-        // Act & Assert
         assertThatThrownBy(() -> loteProdutoService.cadastrarLote(dtoInvalido))
                 .isInstanceOf(DadoIrregularException.class)
                 .hasMessage("A data de validade tem que ser após a data atual");
@@ -133,13 +121,10 @@ class LoteProdutoServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao cadastrar lote para um produto inativo")
     void cadastrarLote_ParaProdutoInativo_LancaExcecao() {
-        // Arrange
         when(produtoService.buscarProdutoId(PRODUTO_ID)).thenReturn(produto);
-        // Simula a falha na verificação de produto ativo
         doThrow(new DadoIrregularException("O produto foi desativado."))
                 .when(produtoService).verificarProdutoAtivo(produto);
 
-        // Act & Assert
         assertThatThrownBy(() -> loteProdutoService.cadastrarLote(cadastroDTO))
                 .isInstanceOf(DadoIrregularException.class)
                 .hasMessage("O produto foi desativado.");
@@ -151,14 +136,11 @@ class LoteProdutoServiceTest {
     @Test
     @DisplayName("Deve buscar lotes disponíveis ordenados por data de validade")
     void buscarLoteProdutoPorDataValidade_QuandoChamado_RetornaListaDoRepositorio() {
-        // Arrange
         List<LoteProduto> lotesEsperados = List.of(new LoteProduto(), new LoteProduto());
         when(repository.findLotesDisponiveisOrdenadosPorValidade(PRODUTO_ID)).thenReturn(lotesEsperados);
 
-        // Act
         List<LoteProduto> resultado = loteProdutoService.buscarLoteProdutoPorDataValidade(PRODUTO_ID);
 
-        // Assert
         assertThat(resultado).isNotNull();
         assertThat(resultado).hasSize(2);
         assertThat(resultado).isEqualTo(lotesEsperados);
@@ -168,14 +150,10 @@ class LoteProdutoServiceTest {
     @Test
     @DisplayName("Deve salvar uma lista de lotes alterados")
     void salvarAlteracoes_ComListaDeLotes_ChamaSaveAllDoRepositorio() {
-        // Arrange
         List<LoteProduto> lotesParaSalvar = List.of(new LoteProduto(), new LoteProduto());
 
-        // Act
         loteProdutoService.salvarAlteracoes(lotesParaSalvar);
 
-        // Assert
-        // Verifica se o método saveAll foi chamado exatamente uma vez com a lista correta
         verify(repository, times(1)).saveAll(lotesParaSalvar);
     }
 }

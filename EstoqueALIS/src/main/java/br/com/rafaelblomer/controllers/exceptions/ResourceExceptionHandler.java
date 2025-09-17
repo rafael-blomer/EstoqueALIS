@@ -9,9 +9,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
@@ -51,25 +48,30 @@ public class ResourceExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
+    public ResponseEntity<StandardError> pegarValidationExceptions(MethodArgumentNotValidException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String mensagens = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .reduce((msg1, msg2) -> msg1 + "; " + msg2)
+                .orElse("Erro de validação");
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Erro de validação nos campos.", mensagens, request.getRequestURI()
         );
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.status(status).body(err);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, String>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        Map<String, String> response = new HashMap<>();
+    public ResponseEntity<StandardError> pegarDataIntegrityViolationException(DataIntegrityViolationException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
         String mensagem = "Violação de integridade de dados.";
-        if (ex.getMostSpecificCause().getMessage().contains("cnpj"))
+        String causeMessage = e.getMostSpecificCause().getMessage().toLowerCase();
+        if (causeMessage.contains("cnpj"))
             mensagem = "Já existe um usuário com esse CNPJ.";
-        else if (ex.getMostSpecificCause().getMessage().contains("email"))
+        else if (causeMessage.contains("email"))
             mensagem = "Já existe um usuário com esse e-mail.";
-        else if (ex.getMostSpecificCause().getMessage().contains("telefone"))
+        else if (causeMessage.contains("telefone"))
             mensagem = "Já existe um usuário com esse telefone.";
-        response.put("erro", mensagem);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        StandardError err = new StandardError(System.currentTimeMillis(), status.value(), "Erro de integridade de dados.", mensagem, request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
     }
 }
