@@ -12,6 +12,11 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+    /**
+     * Envia verificação para o email do usuário quando ele se cadastra
+     * @param user = usuário que receberá o email
+     * @param token = token de verificação de email, NÃO É O TOKEN DO SECURITY
+     */
     public void sendVerificationEmail(Usuario user, String token) {
         String recipientAddress = user.getEmail();
         String subject = "Verificação de Cadastro";
@@ -29,6 +34,11 @@ public class EmailService {
         mailSender.send(email);
     }
 
+    /**
+     * Envia email para o usuário quando ele quer trocar de senha
+     * @param usuario = usuário que quer trocar a senha
+     * @param token = token de verificação de email, NÃO É O TOKEN DO SECURITY
+     */
     public void sendChangePasswordEmail(Usuario usuario, String token) {
         String recipientAddress = usuario.getEmail();
         String subject = "Alteração de Senha";
