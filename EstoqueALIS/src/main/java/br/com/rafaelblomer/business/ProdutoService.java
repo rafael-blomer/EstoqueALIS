@@ -53,7 +53,7 @@ public class ProdutoService {
         estoqueService.verificarEstoqueUsuario(estoque, usuario);
         produto.setEstoque(estoque);
         repository.save(produto);
-        return converter.entityParaResponseDTO(produto, estoque);
+        return converter.entityParaResponseDTO(produto);
     }
 
     /**
@@ -77,7 +77,7 @@ public class ProdutoService {
         Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoProdutoUsuario(usuario, antigo);
         atualizarDadosProduto(antigo, dto);
-        return converter.entityParaResponseDTO(repository.save(antigo), antigo.getEstoque());
+        return converter.entityParaResponseDTO(repository.save(antigo));
     }
 
     /**
@@ -92,7 +92,7 @@ public class ProdutoService {
         Produto produto = buscarProdutoId(id);
         Usuario usuario = usuarioService.findByToken(token);
         verificarPermissaoProdutoUsuario(usuario, produto);
-        return converter.entityParaResponseDTO(produto, produto.getEstoque());
+        return converter.entityParaResponseDTO(produto);
     }
 
     /**
@@ -108,7 +108,7 @@ public class ProdutoService {
                 .stream()
                 .filter(Produto::getAtivo)
                 .filter(p -> p.getEstoque().getAtivo())
-                .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
+                .map(p -> converter.entityParaResponseDTO(p))
                 .toList();
     }
 
@@ -126,7 +126,7 @@ public class ProdutoService {
         return repository.findByEstoqueId(estoqueId)
                 .stream()
                 .filter(Produto::getAtivo)
-                .map(p -> converter.entityParaResponseDTO(p, p.getEstoque()))
+                .map(p -> converter.entityParaResponseDTO(p))
                 .toList();
     }
 

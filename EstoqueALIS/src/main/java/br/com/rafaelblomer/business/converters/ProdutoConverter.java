@@ -23,7 +23,7 @@ public class ProdutoConverter {
         return new Produto(dto.nome(), dto.marca(), dto.descricao(), 0, new ArrayList<>(), new Estoque());
     }
 
-    public ProdutoResponseDTO entityParaResponseDTO(Produto produto, Estoque estoque) {
+    public ProdutoResponseDTO entityParaResponseDTO(Produto produto) {
         relatorioService.calcularQuantidadeTotalProduto(produto);
         return new ProdutoResponseDTO(
                 produto.getId(),
@@ -31,6 +31,6 @@ public class ProdutoConverter {
                 produto.getMarca(),
                 produto.getDescricao(),
                 produto.getQuantidadeTotal(),
-                estoqueConverter.entityParaResponseDTO(estoque));
+                estoqueConverter.entityParaResponseDTO(produto.getEstoque()));
     }
 }
