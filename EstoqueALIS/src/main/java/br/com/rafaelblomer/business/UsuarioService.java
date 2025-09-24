@@ -3,8 +3,10 @@ package br.com.rafaelblomer.business;
 import br.com.rafaelblomer.business.dtos.*;
 import br.com.rafaelblomer.business.exceptions.VerficacaoEmailException;
 import br.com.rafaelblomer.infrastructure.entities.VerificacaoTokenUsuario;
+import br.com.rafaelblomer.infrastructure.event.UsuarioExcluidoEvent;
 import br.com.rafaelblomer.infrastructure.repositories.VerificacaoTokenUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -49,6 +51,9 @@ public class UsuarioService {
     @Autowired
     private VerificacaoTokenUsuarioRepository tokenRepository;
 
+    @Autowired
+    private ApplicationEventPublisher publisher;
+
     /**
      * Cria um novo usuário, criptografa sua senha, gera um token de verificação
      * e envia e-mail de confirmação.
@@ -91,6 +96,7 @@ public class UsuarioService {
     public void alterarStatusAtivoUsuario(String token) {
         Usuario entity = findByToken(token);
         entity.setAtivo(false);
+        publisher.publishEvent(new UsuarioExcluidoEvent(entity));
         repository.save(entity);
     }
 

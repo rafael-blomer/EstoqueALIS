@@ -2,6 +2,7 @@ package br.com.rafaelblomer.business;
 
 import java.util.List;
 
+import br.com.rafaelblomer.infrastructure.event.EstoqueExcluidoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,8 @@ import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.ProdutoRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 public class ProdutoService {
@@ -209,5 +212,16 @@ public class ProdutoService {
             antigo.setMarca(novo.marca());
         if (novo.descricao() != null)
             antigo.setDescricao((novo.descricao()));
+    }
+
+    /**
+     * Desativa todos os produtos do estoque
+     * @param event estoque que terá os produtos desativados
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void desativarProdutosDeEstoque(EstoqueExcluidoEvent event) {
+        List<Produto> list = repository.findByEstoqueId(event.estoque().getId());
+        list.forEach(produto -> produto.setAtivo(false));
+        repository.saveAll(list);
     }
 }

@@ -16,7 +16,6 @@ import br.com.rafaelblomer.business.dtos.LoteProdutoCadastroDTO;
 import br.com.rafaelblomer.business.exceptions.DadoIrregularException;
 import br.com.rafaelblomer.infrastructure.entities.LoteProduto;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
-import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.LoteProdutoRepository;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,10 +1,12 @@
 package br.com.rafaelblomer.business;
 
-import java.util.List;
-
 import br.com.rafaelblomer.business.dtos.EstoqueCadastroDTO;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
+import br.com.rafaelblomer.infrastructure.event.EstoqueExcluidoEvent;
+import br.com.rafaelblomer.infrastructure.event.UsuarioExcluidoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import br.com.rafaelblomer.business.converters.EstoqueConverter;
@@ -16,6 +18,8 @@ import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.EstoqueRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 public class EstoqueService {
@@ -28,6 +32,9 @@ public class EstoqueService {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     /**
      * Cria um novo estoque e o associa ao usuário identificado pelo token da sessão.
@@ -57,6 +64,7 @@ public class EstoqueService {
         Estoque estoque = buscarEstoqueEntityId(id);
         verificarEstoqueUsuario(estoque, usuario);
         estoque.setAtivo(false);
+        publisher.publishEvent(new EstoqueExcluidoEvent(estoque));
         repository.save(estoque);
     }
 
@@ -106,5 +114,17 @@ public class EstoqueService {
     public void verificarEstoqueProduto(Estoque estoque, Produto produto) {
         if (!produto.getEstoque().equals(estoque))
             throw new AcaoNaoPermitidaException("O produto não faz parte desse estoque.");
+    }
+
+    /**
+     * Desativa todos os estoques de um usuário
+     * @param event evento publicado por UsuarioService alertando exclusão de usuário
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void desativarEstoquesDeUsuario(UsuarioExcluidoEvent event) {
+        for (Estoque estoque : event.usuario().getEstoques())
+            publisher.publishEvent(new EstoqueExcluidoEvent(estoque));
+        event.usuario().getEstoques().forEach(estoque -> estoque.setAtivo(false));
+        repository.saveAll(event.usuario().getEstoques());
     }
 }

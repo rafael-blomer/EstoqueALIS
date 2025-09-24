@@ -17,7 +17,7 @@ public class LoteProdutoConverter {
     public LoteProdutoResponseDTO paraLoteProdutoDTO(LoteProduto entity) {
         return new LoteProdutoResponseDTO(
                 entity.getId(),
-                produtoConverter.entityParaResponseDTO(entity.getProduto(), entity.getProduto().getEstoque()),
+                produtoConverter.entityParaResponseDTO(entity.getProduto()),
                 entity.getQuantidadeLote(),
                 entity.getDataValidade(),
                 entity.getLoteFabricante()

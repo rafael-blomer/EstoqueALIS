@@ -55,7 +55,9 @@ public class RelatorioService {
         for (int dias : diasAviso) {
             LocalDate dataAlvo = LocalDate.now().plusDays(dias);
             List<LoteProduto> lotes = loteProdutoRepository.findLotesQueVencemEm(dataAlvo)
-                    .stream().filter(lt -> lt.getQuantidadeLote() > 0).toList();
+                    .stream()
+                    .filter(lt -> lt.getQuantidadeLote() > 0 & lt.getProduto().getAtivo().equals(true))
+                    .toList();
             if (!lotes.isEmpty())
                 notificacaoService.enviarAvisoLotes(lotes, dias);
         }
