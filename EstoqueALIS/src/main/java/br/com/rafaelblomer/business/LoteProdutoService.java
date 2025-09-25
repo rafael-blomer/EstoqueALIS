@@ -29,9 +29,6 @@ public class LoteProdutoService {
     private ProdutoService produtoService;
 
     @Autowired
-    private UsuarioService usuarioService;
-
-    @Autowired
     private ApplicationEventPublisher publisher;
 
     @Autowired

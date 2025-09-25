@@ -6,7 +6,6 @@ import br.com.rafaelblomer.infrastructure.event.EstoqueExcluidoEvent;
 import br.com.rafaelblomer.infrastructure.event.UsuarioExcluidoEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import br.com.rafaelblomer.business.converters.EstoqueConverter;
