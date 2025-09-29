@@ -17,6 +17,7 @@ import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
 import br.com.rafaelblomer.infrastructure.repositories.ProdutoRepository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -219,9 +220,12 @@ public class ProdutoService {
      * @param event estoque que terá os produtos desativados
      */
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void desativarProdutosDeEstoque(EstoqueExcluidoEvent event) {
         List<Produto> list = repository.findByEstoqueId(event.estoque().getId());
-        list.forEach(produto -> produto.setAtivo(false));
-        repository.saveAll(list);
+        if (!list.isEmpty()) {
+            list.forEach(produto -> produto.setAtivo(false));
+            repository.saveAll(list);
+        };
     }
 }

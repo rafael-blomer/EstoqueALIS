@@ -83,7 +83,7 @@ class ProdutoServiceTest {
         when(converter.cadastroParaProdutoEntity(cadastroDTO)).thenReturn(produto);
         when(estoqueService.buscarEstoqueEntityId(ESTOQUE_ID)).thenReturn(estoque);
         when(repository.save(any(Produto.class))).thenReturn(produto);
-        when(converter.entityParaResponseDTO(any(Produto.class), any(Estoque.class)))
+        when(converter.entityParaResponseDTO(any(Produto.class)))
                 .thenReturn(new ProdutoResponseDTO(PRODUTO_ID, "Novo Prod", "Nova Marca", "Desc", 0, null));
 
         ProdutoResponseDTO resultado = produtoService.criarProduto(cadastroDTO, TOKEN);
@@ -117,7 +117,7 @@ class ProdutoServiceTest {
         when(repository.findById(PRODUTO_ID)).thenReturn(Optional.of(produto));
         when(usuarioService.findByToken(TOKEN)).thenReturn(usuario);
         when(repository.save(any(Produto.class))).thenReturn(produto);
-        when(converter.entityParaResponseDTO(any(Produto.class), any(Estoque.class)))
+        when(converter.entityParaResponseDTO(any(Produto.class)))
                 .thenReturn(new ProdutoResponseDTO(PRODUTO_ID, "Nome Atualizado", null, null, 0, null));
 
         produtoService.atualizarProduto(PRODUTO_ID, atualizacaoDTO, TOKEN);
@@ -165,13 +165,13 @@ class ProdutoServiceTest {
 
         when(usuarioService.findByToken(TOKEN)).thenReturn(usuario);
         when(repository.findByEstoqueUsuarioId(USUARIO_ID)).thenReturn(todosOsProdutos);
-        when(converter.entityParaResponseDTO(produtoAtivoEstoqueAtivo, estoque))
+        when(converter.entityParaResponseDTO(produtoAtivoEstoqueAtivo))
                 .thenReturn(new ProdutoResponseDTO(PRODUTO_ID, null, null, null, 0, null));
 
         List<ProdutoResponseDTO> resultado = produtoService.buscarTodosProdutosUsuario(TOKEN);
 
         assertThat(resultado).hasSize(1);
-        assertThat(resultado.get(0).id()).isEqualTo(PRODUTO_ID);
+        assertThat(resultado.getFirst().id()).isEqualTo(PRODUTO_ID);
     }
 
     @Test

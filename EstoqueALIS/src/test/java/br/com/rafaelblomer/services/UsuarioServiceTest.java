@@ -64,7 +64,6 @@ class UsuarioServiceTest {
     private final String FAKE_PASSWORD = "password123";
     private final String HASHED_PASSWORD = "hashedPassword123";
     private final String FAKE_JWT = "fake.jwt.token";
-    private final String FAKE_BEARER_TOKEN = "Bearer " + FAKE_JWT;
 
     @BeforeEach
     void setUp() {
@@ -232,5 +231,4 @@ class UsuarioServiceTest {
 
         verify(tokenRepository, times(1)).delete(verificationToken);
     }
-
 }

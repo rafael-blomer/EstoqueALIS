@@ -11,6 +11,7 @@ import br.com.rafaelblomer.business.exceptions.ObjetoNaoEncontradoException;
 import br.com.rafaelblomer.infrastructure.entities.Estoque;
 import br.com.rafaelblomer.infrastructure.entities.Produto;
 import br.com.rafaelblomer.infrastructure.entities.Usuario;
+import br.com.rafaelblomer.infrastructure.event.EstoqueExcluidoEvent;
 import br.com.rafaelblomer.infrastructure.repositories.EstoqueRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -41,6 +43,9 @@ class EstoqueServiceTest {
 
     @Mock
     private UsuarioService usuarioService;
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     private Usuario usuario;
     private Estoque estoque;
@@ -89,8 +94,9 @@ class EstoqueServiceTest {
         estoqueService.desativarEstoque(TOKEN, ESTOQUE_ID);
 
         verify(repository, times(1)).save(estoque);
-        // Verifica se o estado do objeto estoque foi alterado para inativo.
         assertThat(estoque.getAtivo()).isFalse();
+
+        verify(publisher, times(1)).publishEvent(any(EstoqueExcluidoEvent.class));
     }
 
     @Test

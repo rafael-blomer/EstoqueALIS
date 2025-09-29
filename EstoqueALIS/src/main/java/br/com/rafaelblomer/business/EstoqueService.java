@@ -119,11 +119,11 @@ public class EstoqueService {
      * Desativa todos os estoques de um usuário
      * @param event evento publicado por UsuarioService alertando exclusão de usuário
      */
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
     public void desativarEstoquesDeUsuario(UsuarioExcluidoEvent event) {
-        for (Estoque estoque : event.usuario().getEstoques())
-            publisher.publishEvent(new EstoqueExcluidoEvent(estoque));
         event.usuario().getEstoques().forEach(estoque -> estoque.setAtivo(false));
         repository.saveAll(event.usuario().getEstoques());
+        for (Estoque estoque : event.usuario().getEstoques())
+            publisher.publishEvent(new EstoqueExcluidoEvent(estoque));
     }
 }
