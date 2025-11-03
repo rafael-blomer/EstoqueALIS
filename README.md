@@ -21,7 +21,7 @@ O foco principal é o **backend** — modelagem do domínio, regras de negócio,
 
 ---
 
-## ⚙️ Principais Funcionalidades
+## Principais Funcionalidades
 
 1. Cadastro e autenticação de usuários (login via **JWT**).  
 2. Verificação de e-mail com token de validação e fluxo de recuperação de senha.  
