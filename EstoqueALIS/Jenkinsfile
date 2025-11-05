@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    tools {
+        jdk 'jdk17'
+        maven 'M3'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Baixando código-fonte...'
+                checkout scm
+            }
+        }
+        stage('Build') {
+            steps {
+                echo 'Compilando o projeto...'
+                bat 'mvn -B clean package'
+            }
+        }
+        stage('Testes') {
+            steps {
+                echo 'Executando testes unitários...'
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        stage('Arquivar artefato') {
+            steps {
+                echo 'Salvando o .jar gerado...'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+    }
+    post {
+        success {
+            echo '✅ Build concluído com sucesso!'
+        }
+        failure {
+            echo '❌ Falha no build!'
+        }
+        always {
+            cleanWs()
+        }
+    }
+}
